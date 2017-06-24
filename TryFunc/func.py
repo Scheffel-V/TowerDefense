@@ -5,19 +5,18 @@ def first(list ):
 
 
 def rest(list):
-	rest_of_list = []
-	for x in range(1,len(list)):
-		rest_of_list.append(list[x])
-	return rest_of_list
+	return list[1:]
+
 
 def is_empty(list):
 	if len(list) == 0:
 		return True
 	else:
 		return False
+
+
 def cons(element,list):
-	if(element != empty):
-		aux_list = [element]
-		return aux_list+list
+	if (element != empty):
+		return [element]+list
 	else:
-		return []	
+		return []
