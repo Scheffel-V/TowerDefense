@@ -25,7 +25,7 @@ class Rectangle(object):
             return False
 
     def calcCenter(self):
-        return [first(self._position) + .5 * self._width, second(self._position) + .5 * self._height]
+        return int(first(self._position) + .5 * self._width), int(second(self._position) + .5 * self._height)
 
     def getImage(self):
         return self._image

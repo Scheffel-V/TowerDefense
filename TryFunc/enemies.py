@@ -1,4 +1,4 @@
-#falta a função insideRectPosition
+#falta as funções insideRectPosition e executeEffects
 import rectangle
 import config
 from func import *
@@ -86,9 +86,12 @@ class Enemie(rectangle.Rectangle):
             damage(times-1)
 
     def executeEffects(self, towerDefense):
-        self._specialEffects = list(map(lambda x: x.decDuration(), self._specialEffects))
-        burnEffect = list(filter(lambda x: x == "Burn",self._specialEffects))
-        self.damage(len(burnEffect),towerDefense)
+        if not is_empty(self._specialEffects):
+            for effectAux in self._specialEffects:
+                 effectAux.decDuration()
+            #self._specialEffects=list(map(lambda x: x.decDuration(), self._specialEffects))
+            burnEffect = list(filter(lambda x: x == "Burn",self._specialEffects))
+            self.damage(len(burnEffect),towerDefense)
 
     def despawn(self, towerDefense):
         towerDefense.delEnemie(self)
