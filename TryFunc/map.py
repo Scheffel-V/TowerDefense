@@ -1,3 +1,4 @@
+# OK
 # coding=utf-8
 import rectangle
 import config

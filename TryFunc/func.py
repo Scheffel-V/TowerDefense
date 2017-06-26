@@ -4,6 +4,10 @@ def first(list ):
     return list[0]
 
 
+def second(list ):
+    return list[1]
+
+
 def rest(list):
 	return list[1:]
 

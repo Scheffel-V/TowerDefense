@@ -1,6 +1,7 @@
+#falta a função insideRectPosition
 import rectangle
 import config
-
+from func import *
 
 class Enemie(rectangle.Rectangle):
     def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir):
@@ -58,40 +59,44 @@ class Enemie(rectangle.Rectangle):
             self._specialEffects.append(burnEffect)
 
     def isBurned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Burn":
-                return True
-        return False
+        if is_empty( list(filter(lambda x: x == "Burn",self._specialEffects)) ):
+            return False
+        else:
+            return True
 
     def setIce(self, iceEffect):
         if not self.isIced():
-            self._specialEffects.append(iceEffect)
+            cons(iceEffect, self._specialEffects)
             self.slow(iceEffect.getSlow())
 
     def isIced(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Ice":
-                return True
-        return False
+        if is_empty( list(filter(lambda x: x == "Ice",self._specialEffects)) ):
+            return False
+        else:
+            return True
 
     def delEffect(self, effect):
         if effect.getName() == "Ice":
             self.refreshSpeed()
         self._specialEffects.remove(effect)
 
+    def damage(self, times, towerDefense):
+        if times != 0:
+            self.hit(effectAux.getDamagePerSecond(), towerDefense)
+            damage(times-1)
+
     def executeEffects(self, towerDefense):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Burn":
-                self.hit(effectAux.getDamagePerSecond(), towerDefense)
-            effectAux.decDuration()
+        self._specialEffects = list(map(lambda x: x.decDuration(), self._specialEffects))
+        burnEffect = list(filter(lambda x: x == "Burn",self._specialEffects))
+        self.damage(len(burnEffect),towerDefense)
 
     def despawn(self, towerDefense):
         towerDefense.delEnemie(self)
 
     def insideRectPosition(self, rectMap):
-        for i in range(0, rectMap.getDimension()[0]):
-            for j in range(0, rectMap.getDimension()[1]):
-                if rectMap.getMap()[i][j][1].isInside(self.getCenter()):
+        for i in range(0, first(rectMap.getDimension())):
+            for j in range(0, second(rectMap.getDimension())):
+                if second(rectMap.getMap()[i][j]).isInside(self.getCenter()):
                     return i, j
 
     def _setInitialFlags(self, firstDir):
@@ -114,10 +119,9 @@ class Enemie(rectangle.Rectangle):
     # nao volte pra esquerda nenhuma vez. Ainda vou acabar a ultima parte
     # pro mapa poder voltar ( mapas em espiral )
     def move(self, mapMatrix, rectMap, towerDefense):
-
         rectPosition = self.insideRectPosition(rectMap)
-        rectPositionI = rectPosition[0]
-        rectPositionJ = rectPosition[1]
+        rectPositionI = first(rectPosition)
+        rectPositionJ = second(rectPosition)
         mapMatrixNextColumn = mapMatrix[rectPositionI][rectPositionJ + 1]
         mapMatrixPrevColumn = mapMatrix[rectPositionI][rectPositionJ - 1]
         mapMatrixNextRow = mapMatrix[rectPositionI + 1][rectPositionJ]
@@ -181,25 +185,13 @@ class Enemie(rectangle.Rectangle):
                or thirdCondition == config.Config.MAP_NUMBMATRIX_DESPAWN
 
     def moveRight(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
-        positionX += self._speed
-        self.setPosition((positionX, positionY))
+        self.setPosition(( first(self._position)+self._speed, second(self._position)))
 
     def moveLeft(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
-        positionX -= self._speed
-        self.setPosition((positionX, positionY))
+        self.setPosition(( first(self._position)-self._speed, second(self._position)))
 
     def moveDown(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
-        positionY += self._speed
-        self.setPosition((positionX, positionY))
+        self.setPosition(( first(self._position), second(self._position)+self._speed))
 
     def moveUp(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
-        positionY -= self._speed
-        self.setPosition((positionX, positionY))
+        self.setPosition(( first(self._position), second(self._position)-self._speed))
