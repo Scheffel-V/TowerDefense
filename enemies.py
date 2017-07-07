@@ -46,16 +46,12 @@ class Enemie(rectangle.Rectangle):
 
     def hit(self, damage, towerDefense):
         if damage >= self._health:
-            towerDefense.getPlayer().addCash(self._earnCash)
             self.despawn(towerDefense)
         else:
             self._health = self._health - damage
 
     def slow(self, slow):
         self._speed -= slow
-
-    def stun(self):
-        self._speed = 0
 
     def setBurn(self, burnEffect):
         if not self.isBurned():
@@ -78,45 +74,10 @@ class Enemie(rectangle.Rectangle):
                 return True
         return False
 
-    def setPoison(self, poisonEffect):
-        if not self.isPoisoned():
-            self._specialEffects.append(poisonEffect)
-
-    def isPoisoned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Poison":
-                return True
-        return False
-
-    def setThunder(self, thunderEffect):
-        if not self.isStunned():
-            self._specialEffects.append(thunderEffect)
-            self.stun()
-
-    def isStunned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Thunder":
-                return True
-        return False
-
-    def setEffect(self, effect):
-        if effect.getName() == "Ice":
-            print("entrei")
-            self.setIce(effect)
-        elif effect.getName() == "Burn":
-            self.setBurn(effect)
-        elif effect.getName() == "Poison":
-            self.setPoison(effect)
-        elif effect.getName() == "Thunder":
-            self.setThunder(effect)
-
     def delEffect(self, effect):
         if effect.getName() == "Ice":
             self.refreshSpeed()
-        elif effect.getName() == "Thunder":
-            self.refreshSpeed()
-        if self._specialEffects.__contains__(effect):
-            self._specialEffects.remove(effect)
+        self._specialEffects.remove(effect)
 
     def executeEffects(self, towerDefense):
         for effectAux in self._specialEffects:
@@ -164,7 +125,6 @@ class Enemie(rectangle.Rectangle):
         mapMatrixPosition = mapMatrix[rectPositionI][rectPositionJ]
 
         if mapMatrixPosition == config.Config.MAP_NUMBMATRIX_DESPAWN:
-            towerDefense.getPlayer().decLife()
             self.despawn(towerDefense)
         else:
             if self._rightFlag:

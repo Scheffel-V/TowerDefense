@@ -17,7 +17,7 @@ class TowerDefense:
     I, J = 0, 0
     selectedObject = 0
 
-    def __init__(self, player):
+    def __init__(self, player, player_map):
         self._towerList = []
         self._enemiesList = []
         self._trapList = []
@@ -25,6 +25,8 @@ class TowerDefense:
         self._purchasingTrap = False
         self._clickedInTowerOrTrap = False
         self._matrix = 0
+        self._player_map = None
+        self.setPlayerMap(player_map)
         self.inicializeMatrix()
         self._rectMap = map.Map(config.Config.MAP_DIMS, config.Config.RECT_DIMS_px, self._matrix)
         self._towerMenuBackground = pygame.image.load(config.Config.MENUTOWERS_IMAGE)
@@ -39,6 +41,16 @@ class TowerDefense:
         self._timer = 0
         self._enemieTimer = 1
 
+    def getPlayerMap(self):
+        return self._player_map
+
+    def setPlayerMap(self, player_map):
+        if player_map.split('.')[-1] != 'map':
+            print("Por favor insira um arquivo do tipo .map")
+            raise
+ 
+        self._player_map = player_map
+
     def addTower(self, newTower):
         self._towerList.append(newTower)
 
@@ -50,9 +62,6 @@ class TowerDefense:
         
     def getTraps(self):
         return self._trapList
-
-    def getPlayer(self):
-        return self._player
 
     def addEnemie(self, newEnemie):
         self._enemiesList.append(newEnemie)
@@ -83,6 +92,7 @@ class TowerDefense:
 
     def getFirstDir(self):
         spawnPosI, spawnPosJ = self.getSpawnPosition()
+        print(self.getSpawnPosition())
         if self._matrix[spawnPosI + 1][spawnPosJ] == config.Config.MAP_NUMBMATRIX_CENTRALPATH:
             return 'D'
         elif self._matrix[spawnPosI - 1][spawnPosJ] == config.Config.MAP_NUMBMATRIX_CENTRALPATH:
@@ -426,7 +436,7 @@ class TowerDefense:
         return self._timer
 
     def inicializeMatrix(self):
-        f = open("maps/map2.map")
+        f = open(self.getPlayerMap())
         self._matrix = []
         for line in f.readlines():
             self._matrix.append([int(x) for x in line.strip('[]\n').split(',')])

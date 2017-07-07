@@ -21,9 +21,6 @@ class Player:
     def setCash(self, cash):
         self._cash = cash
 
-    def addCash(self, cashToAdd):
-        self._cash += cashToAdd
-
     def purchaseObject(self, objectPrice):
         self._cash = self._cash - objectPrice
 
