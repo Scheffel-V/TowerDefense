@@ -23,7 +23,21 @@ class Config:
     CREATIONMODE_IMAGE = "imagens/creation_menu.png"
     
     GRASS_IMAGE = "imagens/grass_outlined.png"
+
+
+    #MENUS
+
+    MENU_WIDTH = 380
+    MENU_HEIGHT = 480
+
+    MAIN_MENU_IMAGE = "imagens/main_menu.png"
     
+    GRASS_IMAGE = "imagens/grass_outlined.png"
+
+    MAIN_MENU_FONT = "fonts/Colleged.ttf"
+    MENU_POINTER_2 = "imagens/demonho.png"
+    
+   
     #spawns
     SPAWN_IMAGE = "imagens/spawn.png"
     DESPAWN_IMAGE = "imagens/despawn.png"
