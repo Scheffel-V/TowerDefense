@@ -23,21 +23,7 @@ class Config:
     CREATIONMODE_IMAGE = "imagens/creation_menu.png"
     
     GRASS_IMAGE = "imagens/grass_outlined.png"
-
-
-    #MENUS
-
-    MENU_WIDTH = 380
-    MENU_HEIGHT = 480
-
-    MAIN_MENU_IMAGE = "imagens/main_menu.png"
     
-    GRASS_IMAGE = "imagens/grass_outlined.png"
-
-    MAIN_MENU_FONT = "fonts/Colleged.ttf"
-    MENU_POINTER_2 = "imagens/demonho.png"
-    
-   
     #spawns
     SPAWN_IMAGE = "imagens/spawn.png"
     DESPAWN_IMAGE = "imagens/despawn.png"
@@ -108,6 +94,14 @@ class Config:
     ICETRAP_PRICE = 100
     ICETRAP_BUYER_POS = (595, 108)
 
+    #UPGRADES
+    UPGRADE_DAMAGE_IMAGE = "imagens/upgrade_damage.png"
+    UPGRADE_DAMAGE_WIDTH = 64
+    UPGRADE_DAMAGE_HEIGHT = 64
+    UPGRADE_DAMAGE_INITIAL_PRICE = 100
+    UPGRADE_DAMAGE_MAX_LEVEL = 6
+    UPGRADE_DAMAGE_POS = (493, 300)
+
     #EFFECTS
     ##BURN
     BURNEFFECT_NAME = "Burn"
@@ -119,6 +113,15 @@ class Config:
     ICEEFFECT_DURATION = 3
     ICEEFFECT_SLOW = 1.0
 
+    ##POISON
+    POISONEFFECT_NAME = "Poison"
+    POISONEFFECT_DURATION = 3
+    POISONEFFECT_DAMAGEPERSECOND = 1.0
+
+    ##THUNDER
+    THUNDEREFFECT_NAME = "Thunder"
+    THUNDEREFFECT_DURATION = 1
+
     #ENEMIES
     ENEMIE_SPAWNPOSITION = (0, 160)
     ENEMIE_IMAGE = "imagens/enemy.png"
@@ -126,5 +129,5 @@ class Config:
     ENEMIE_HEIGHT = 16
     ENEMIE_HEALTH = 30
     ENEMIE_SPEED = 2.0 # ENTRE 1 E !0
-    ENEMIE_EARNCASH = 0
-    ENEMIE_LIFESWILLTOOK = 0
+    ENEMIE_EARNCASH = 6
+    ENEMIE_LIFESWILLTOOK = 1

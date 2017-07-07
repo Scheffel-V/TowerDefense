@@ -1,11 +1,12 @@
 import rectangle
 
 class Shot(rectangle.Rectangle):
-    def __init__(self, position, width, height, image, speed, targetPosition, damage):
+    def __init__(self, position, width, height, image, speed, targetPosition, damage, effect):
         super(Shot, self).__init__(position, width, height, image)
         self._speed = speed
         self._direction = self.calculateDirection(targetPosition)
         self._damage = damage
+        self._effect = effect
 
     def getSpeed(self):
         return self._speed
@@ -15,6 +16,9 @@ class Shot(rectangle.Rectangle):
 
     def getDamage(self):
         return self._damage
+
+    def getEffect(self):
+        return self._effect
 
     def calculateDirection(self, targetPosition):
         vector = targetPosition[0] - self._position[0], targetPosition[1] - self._position[1]

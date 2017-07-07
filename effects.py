@@ -39,3 +39,13 @@ class IceEffect(Effect):
 
     def getSlow(self):
         return self._slow
+
+class PoisonEffect(Effect):
+    def __init__(self, enemie):
+        super(PoisonEffect, self).__init__(config.Config.POISONEFFECT_NAME, config.Config.POISONEFFECT_DURATION, enemie)
+        self._damge = config.Config.POISONEFFECT_DAMAGEPERSECOND
+
+class ThunderEffect(Effect):
+    def __init__(self, enemie):
+        super(ThunderEffect, self).__init__(config.Config.THUNDEREFFECT_NAME, config.Config.THUNDEREFFECT_DURATION, enemie)
+
