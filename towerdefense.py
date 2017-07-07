@@ -46,8 +46,9 @@ class TowerDefense:
 
     def setPlayerMap(self, player_map):
         if player_map.split('.')[-1] != 'map':
-            raise("Por favor insira um arquivo do tipo .map")
-
+            print("Por favor insira um arquivo do tipo .map")
+            raise
+ 
         self._player_map = player_map
 
     def addTower(self, newTower):

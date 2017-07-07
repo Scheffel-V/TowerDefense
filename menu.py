@@ -1,12 +1,14 @@
 import pygame
 import config
 from tkinter.filedialog import askopenfilename
+from tkinter import Tk
 import pygame
 import towerdefense as TD
 import player as PLAYER
 import game as GAME
 import os
 import random
+import mapcreator as MP
 
 class Menu:
 	def __init__(self):
@@ -94,23 +96,39 @@ class Menu:
 
 	def _handle_menu_press(self):
 		if self._selectedOption == 0:
+			root = Tk()
+			root.withdraw()
 			filename = askopenfilename()
+			root.destroy()
 			self._start_new_game("Vinicius", filename)
 
 		elif self._selectedOption == 1:
 			maps = os.listdir("maps")
 			if maps == []:
-				raise("No map was found!")
+				print("No map was found!")
+				raise
 			else:
-				filename = "maps/" + maps[random.randint(0, len(maps))]
+				filename = "maps/" + maps[random.randint(0, len(maps)-1)]
 			self._start_new_game("Vinicius", filename)
 			
 		elif self._selectedOption == 2:
-			pass
+			mapcreator = MP.MapCreator()
+			mapcreator.setWindowCaption("Map Creation Window !")
+			mapcreator.start()
+
 		elif self._selectedOption == 3:
-			pass
+
+			root = Tk()
+			root.withdraw()
+			filemap = askopenfilename()
+			root.destroy()
+
+			mapcreator = MP.MapCreator(filemap)
+			mapcreator.setWindowCaption("Map Creation Window !")
+			mapcreator.loadMap(filemap)
+			mapcreator.start()
 		elif self._selectedOption == 4:
-			pass
+			self._gameExit = True
 		else:
 			raise ("You somehow selected an invalid option !")
 
