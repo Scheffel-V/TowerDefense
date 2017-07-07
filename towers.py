@@ -4,6 +4,7 @@ import rectangle
 import pygame
 import abc
 import shot
+import effects
 
 
 # Classe Tower estende de Rectangle:
@@ -77,8 +78,9 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
                     self.resetReloadTime()
                     break
 
+    @abc.abstractmethod
     def shot(self, enemie):
-        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), 10))
+        pass
 
     def moveShots(self, gameDisplay, enemieList, towerDefense):
         for shotAux in self._shotList:
@@ -86,6 +88,8 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
             for enemieAux in enemieList:
                 if enemieAux.collide(shotAux):
                     enemieAux.hit(shotAux.getDamage(), towerDefense)
+                    if shotAux.getEffect() != "NULL":
+                        enemieAux.setEffect(shotAux.getEffect())
                     shotAux.destroy(self)
         self.paintShots(gameDisplay)
 
@@ -140,6 +144,8 @@ class ClassicTower(Tower):
     def newCopy(self):
         return ClassicTower(self._position)
 
+    def shot(self, enemie):
+        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), 10, "NULL"))
 
 
 class ClassicTowerBuyer(Tower):
@@ -159,6 +165,9 @@ class ClassicTowerBuyer(Tower):
     def newCopy(self):
         return ClassicTowerBuyer(self._position)
 
+    def shot(self, enemie):
+        pass
+
 
 class BlueTower(Tower):
     def __init__(self, position):
@@ -177,6 +186,9 @@ class BlueTower(Tower):
     def newCopy(self):
         return BlueTower(self._position)
 
+    def shot(self, enemie):
+        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), 10, effects.IceEffect(enemie)))
+
 
 class BlueTowerBuyer(Tower):
     def __init__(self, position):
@@ -194,3 +206,6 @@ class BlueTowerBuyer(Tower):
 
     def newCopy(self):
         return BlueTowerBuyer(self._position)
+
+    def shot(self, enemie):
+        pass
