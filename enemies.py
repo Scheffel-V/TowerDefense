@@ -3,7 +3,7 @@ import config
 
 
 class Enemie(rectangle.Rectangle):
-    def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir):
+    def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir, multiplier):
         super(Enemie, self).__init__(position, width, height, image)
         self._health = health
         self._speed = speed
@@ -52,7 +52,8 @@ class Enemie(rectangle.Rectangle):
             self._health = self._health - damage
 
     def slow(self, slow):
-        self._speed -= slow
+        if self._speed != 0:
+            self._speed -= slow
 
     def stun(self):
         self._speed = 0

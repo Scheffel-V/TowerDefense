@@ -7,6 +7,7 @@ import towers
 import traps
 import enemies
 import rectangle
+import waves
 
 
 # Classe TowerDefense:
@@ -62,10 +63,15 @@ class TowerDefense:
         self._insideRangeButton = False
         self._insideEffectButton = False
         self._insideTrapButton = False
+        self._waveOn = False
         self._cash = config.Config.PLAYER_CASH
         self._player = player
         self._timer = 0
         self._enemieTimer = 1
+        self._beginWaveTimer = 10
+        self._enemieFirstDirection = self.getFirstDir()
+        self._wave = waves.Waves(self._enemieFirstDirection, self.getEnemySpawnPosition())
+        self._spawnEnemieCount = 10
 
     def getPlayerMap(self):
         return self._player_map
@@ -132,16 +138,15 @@ class TowerDefense:
             return 'L'
 
     def spawnEnemie(self):
-        self.addEnemie(enemies.Enemie(self.getEnemySpawnPosition(),
-                                      config.Config.ENEMIE_WIDTH,
-                                      config.Config.ENEMIE_HEIGHT,
-                                      config.Config.ENEMIE_IMAGE,
-                                      config.Config.ENEMIE_HEALTH,
-                                      config.Config.ENEMIE_SPEED,
-                                      config.Config.ENEMIE_EARNCASH,
-                                      config.Config.ENEMIE_LIFESWILLTOOK,
-                                      self.getFirstDir() ))
+        self._spawnEnemieCount += 1
+        enemie = self._wave.getEnemieToSpawn()
+        if enemie.getLifesWillTook() == 15:
+            self._spawnEnemieCount = 10
+        self.addEnemie(enemie)
         self._enemieTimer = 1
+        if self._spawnEnemieCount == 10:
+            self._beginWaveTimer = 10
+            self._waveOn = False
 
     def delEnemie(self, enemie):
         if self._enemiesList.__contains__(enemie):
@@ -339,16 +344,24 @@ class TowerDefense:
             self.turnOnClickedInTrap()
         elif self.isClickedInTower():
             if self._damageButton.isInside(mousePosition):
-                self.selectedObject.upgradeDamage()
+                if self._player.haveCashToBuy(self.selectedObject.getUpgradeDamagePrice()):
+                    self._player.purchaseObject(self.selectedObject.getUpgradeDamagePrice())
+                    self.selectedObject.upgradeDamage()
             elif self._rangeButton.isInside(mousePosition):
-                self.selectedObject.upgradeRange()
+                if self._player.haveCashToBuy(self.selectedObject.getUpgradeRangePrice()):
+                    self._player.purchaseObject(self.selectedObject.getUpgradeRangePrice())
+                    self.selectedObject.upgradeRange()
             elif self._effectButton.isInside(mousePosition):
-                self.selectedObject.upgradeEffect()
+                if self._player.haveCashToBuy(self.selectedObject.getUpgradeEffectPrice()):
+                    self._player.purchaseObject(self.selectedObject.getUpgradeEffectPrice())
+                    self.selectedObject.upgradeEffect()
             else:
                 self.turnOffClickedInTower()
         elif self.isClickedInTrap():
             if self._trapButton.isInside(mousePosition):
-                self.selectedObject.upgrade()
+                if self._player.haveCashToBuy(self.selectedObject.getPriceToUpgrade()):
+                    self._player.purchaseObject(self.selectedObject.getPriceToUpgrade())
+                    self.selectedObject.upgrade()
             else:
                 self.turnOffClickedInTrap()
         elif self.isInsideBuying(mousePosition): #EFEITO COLATERAL - arrumar
@@ -459,6 +472,7 @@ class TowerDefense:
         self.paintCash(gameDisplay)
         self.paintLife(gameDisplay)
         self.paintName(gameDisplay)
+        self.paintWave(gameDisplay)
         if self.getTimer() > 0:
             self.paintHaveNoCashMess(gameDisplay, mousePosition)
         if self._enemieTimer == 0:
@@ -529,6 +543,11 @@ class TowerDefense:
         text = font.render("%s" % self._player.getName(), True, (0, 0, 0))
         gameDisplay.blit(text, (495, 402))
 
+    def paintWave(self, gameDisplay):
+        font = pygame.font.SysFont(None, 30)
+        text = font.render("Wave:%d" % self._wave.getWaveNumber(), True, (0, 0, 0))
+        gameDisplay.blit(text, (495, 445))
+
     def turnOnShift(self):
         self._shift = True
 
@@ -540,7 +559,19 @@ class TowerDefense:
 
     def decTimer(self):
         self._timer -= 1
-        self._enemieTimer -= 1
+
+        if self._beginWaveTimer == 0 and not self._waveOn:
+            self._wave.incWaveNumber()
+            self._waveOn = True
+        else:
+            if not self._enemiesList:
+                self._waveOn = False
+                self._spawnEnemieCount = 0
+                self._beginWaveTimer -= 1
+
+        if self._waveOn:
+            self._enemieTimer -= 1
+
         for towerAux in self.getTowers():
             towerAux.decReloadTime()
 
@@ -549,10 +580,6 @@ class TowerDefense:
 
         for enemieAux in self.getEnemies():
             enemieAux.executeEffects(self)
-
-    #def decTimerDecisegundo(self):
-     #   for towerAux in self.getTowers():
-      #      towerAux.decReloadTime()
 
     def getTimer(self):
         return self._timer
