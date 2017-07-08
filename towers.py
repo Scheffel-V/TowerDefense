@@ -16,8 +16,14 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
     def __init__(self, position, width, height, image, range, damage, fireRate, price):
         super(Tower, self).__init__(position, width, height, image)
         self._range = range
+        self._rangeLevel = 1
+        self._upgradeRangePrice = 40
         self._damage = damage
+        self._damageLevel = 1
+        self._upgradeDamagePrice = 50
         self._fireRate = fireRate
+        self._effectLevel = 1
+        self._upgradeEffectPrice = 40
         self._reloadTime = 1 / fireRate
         self._price = price
         self._shotList = []
@@ -60,6 +66,29 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
     def getShotList(self):
         return self._shotList
 
+    def getUpgradeDamagePrice(self):
+        return self._upgradeDamagePrice
+
+    def upgradeDamage(self):
+        self._damageLevel += 1
+        self._damage = config.Config.CLASSICTOWER_DAMAGE * 1.3 ** (self._damageLevel - 1)
+        self._upgradeDamagePrice = self._upgradeDamagePrice + 10 * self._damageLevel ** 1.5
+
+    def getUpgradeRangePrice(self):
+        return self._upgradeRangePrice
+
+    def upgradeRange(self):
+        self._rangeLevel += 1
+        self._range += 10
+        self._upgradeRangePrice = self._upgradeRangePrice + 10 * self._rangeLevel ** 1.5
+
+    def getUpgradeEffectPrice(self):
+        return self._upgradeEffectPrice
+
+    def upgradeEffect(self):
+        self._effectLevel += 1
+        self._upgradeEffectPrice = self._upgradeEffectPrice + 10 * self._effectLevel ** 1.5
+
     def doublePrice(self):
         self._price *= 2
 
@@ -87,10 +116,11 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
             shotAux.move()
             for enemieAux in enemieList:
                 if enemieAux.collide(shotAux):
-                    enemieAux.hit(shotAux.getDamage(), towerDefense)
                     if shotAux.getEffect() != "NULL":
                         enemieAux.setEffect(shotAux.getEffect())
+                    enemieAux.hit(shotAux.getDamage(), towerDefense)
                     shotAux.destroy(self)
+                    break
         self.paintShots(gameDisplay)
 
     def delShot(self, shot):
@@ -145,7 +175,7 @@ class ClassicTower(Tower):
         return ClassicTower(self._position)
 
     def shot(self, enemie):
-        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), 10, "NULL"))
+        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), self.getDamage(), "NULL"))
 
 
 class ClassicTowerBuyer(Tower):
@@ -187,7 +217,7 @@ class BlueTower(Tower):
         return BlueTower(self._position)
 
     def shot(self, enemie):
-        self._shotList.append(shot.Shot(self.getPosition(), 8, 8, "imagens/shot.png", 0.5, enemie.getPosition(), 10, effects.IceEffect(enemie)))
+        self._shotList.append(shot.IceShot(self.getPosition(), self.getDamage(), enemie.getPosition(), effects.IceEffect(enemie, self._effectLevel)))
 
 
 class BlueTowerBuyer(Tower):
@@ -206,6 +236,88 @@ class BlueTowerBuyer(Tower):
 
     def newCopy(self):
         return BlueTowerBuyer(self._position)
+
+    def shot(self, enemie):
+        pass
+
+class PoisonTower(Tower):
+    def __init__(self, position):
+        super(PoisonTower, self).__init__(position,
+                                        config.Config.POISONTOWER_WIDTH,
+                                        config.Config.POISONTOWER_HEIGHT,
+                                        config.Config.POISONTOWER_IMAGE_small,
+                                        config.Config.POISONTOWER_RANGE,
+                                        config.Config.POISONTOWER_DAMAGE,
+                                        config.Config.POISONTOWER_FIRERATE,
+                                        config.Config.POISONTOWER_PRICE)
+
+    def getClass(self):
+        return "PoisonTower"
+
+    def newCopy(self):
+        return PoisonTower(self._position)
+
+    def shot(self, enemie):
+        self._shotList.append(shot.PoisonShot(self.getPosition(), self.getDamage(), enemie.getPosition(), effects.PoisonEffect(enemie, self._effectLevel)))
+
+
+class PoisonTowerBuyer(Tower):
+    def __init__(self, position):
+        super(PoisonTowerBuyer, self).__init__(position,
+                                             config.Config.POISONTOWER_WIDTH * 2,
+                                             config.Config.POISONTOWER_HEIGHT * 2,
+                                             config.Config.POISONTOWER_IMAGE_big,
+                                             config.Config.POISONTOWER_RANGE,
+                                             config.Config.POISONTOWER_DAMAGE,
+                                             config.Config.POISONTOWER_FIRERATE,
+                                             config.Config.POISONTOWER_PRICE)
+
+    def getClass(self):
+        return "PoisonTowerBuyer"
+
+    def newCopy(self):
+        return PoisonTowerBuyer(self._position)
+
+    def shot(self, enemie):
+        pass
+
+class ThunderTower(Tower):
+    def __init__(self, position):
+        super(ThunderTower, self).__init__(position,
+                                        config.Config.THUNDERTOWER_WIDTH,
+                                        config.Config.THUNDERTOWER_HEIGHT,
+                                        config.Config.THUNDERTOWER_IMAGE_small,
+                                        config.Config.THUNDERTOWER_RANGE,
+                                        config.Config.THUNDERTOWER_DAMAGE,
+                                        config.Config.THUNDERTOWER_FIRERATE,
+                                        config.Config.THUNDERTOWER_PRICE)
+
+    def getClass(self):
+        return "ThunderTower"
+
+    def newCopy(self):
+        return ThunderTower(self._position)
+
+    def shot(self, enemie):
+        self._shotList.append(shot.ThunderShot(self.getPosition(), self.getDamage(), enemie.getPosition(), effects.ThunderEffect(enemie, self._effectLevel)))
+
+
+class ThunderTowerBuyer(Tower):
+    def __init__(self, position):
+        super(ThunderTowerBuyer, self).__init__(position,
+                                             config.Config.THUNDERTOWER_WIDTH * 2,
+                                             config.Config.THUNDERTOWER_HEIGHT * 2,
+                                             config.Config.THUNDERTOWER_IMAGE_big,
+                                             config.Config.THUNDERTOWER_RANGE,
+                                             config.Config.THUNDERTOWER_DAMAGE,
+                                             config.Config.THUNDERTOWER_FIRERATE,
+                                             config.Config.THUNDERTOWER_PRICE)
+
+    def getClass(self):
+        return "ThunderTowerBuyer"
+
+    def newCopy(self):
+        return ThunderTowerBuyer(self._position)
 
     def shot(self, enemie):
         pass

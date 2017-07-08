@@ -6,6 +6,7 @@ import map
 import towers
 import traps
 import enemies
+import rectangle
 
 
 # Classe TowerDefense:
@@ -23,7 +24,8 @@ class TowerDefense:
         self._trapList = []
         self._purchasingTower = False
         self._purchasingTrap = False
-        self._clickedInTowerOrTrap = False
+        self._clickedInTower = False
+        self._clickedInTrap = False
         self._matrix = 0
         self._player_map = None
         self.setPlayerMap(player_map)
@@ -31,11 +33,35 @@ class TowerDefense:
         self._rectMap = map.Map(config.Config.MAP_DIMS, config.Config.RECT_DIMS_px, self._matrix)
         self._towerMenuBackground = pygame.image.load(config.Config.MENUTOWERS_IMAGE)
         self._buyingTowers = [towers.ClassicTowerBuyer(config.Config.CLASSICTOWER_BUYER_POS),
-                              towers.BlueTowerBuyer(config.Config.BLUETOWER_BUYER_POS)]
+                              towers.BlueTowerBuyer(config.Config.BLUETOWER_BUYER_POS),
+                              towers.PoisonTowerBuyer(config.Config.POISONTOWER_BUYER_POS),
+                              towers.ThunderTowerBuyer(config.Config.THUNDERTOWER_BUYER_POS)]
         self._buyingTraps = [traps.FireTrapBuyer(config.Config.FIRETRAP_BUYER_POS),
-                             traps.IceTrapBuyer(config.Config.ICETRAP_BUYER_POS)]
+                             traps.IceTrapBuyer(config.Config.ICETRAP_BUYER_POS),
+                             traps.ThunderTrapBuyer(config.Config.THUNDERTRAP_BUYER_POS),
+                             traps.PoisonTrapBuyer(config.Config.POISONTRAP_BUYER_POS)]
+        self._damageButton = rectangle.Rectangle(config.Config.UPGRADEBUTTON_DAMAGE_POSITION,
+                                                  config.Config.UPGRADEBUTTON_DAMAGE_WIDTH,
+                                                  config.Config.UPGRADEBUTTON_DAMAGE_HEIGHT,
+                                                  config.Config.UPGRADEBUTTON_DAMAGE_IMAGE)
+        self._rangeButton = rectangle.Rectangle(config.Config.UPGRADEBUTTON_RANGE_POSITION,
+                                                 config.Config.UPGRADEBUTTON_RANGE_WIDTH,
+                                                 config.Config.UPGRADEBUTTON_RANGE_HEIGHT,
+                                                 config.Config.UPGRADEBUTTON_RANGE_IMAGE)
+        self._effectButton = rectangle.Rectangle(config.Config.UPGRADEBUTTON_EFFECT_POSITION,
+                                                 config.Config.UPGRADEBUTTON_EFFECT_WIDTH,
+                                                 config.Config.UPGRADEBUTTON_EFFECT_HEIGHT,
+                                                 config.Config.UPGRADEBUTTON_EFFECT_IMAGE)
+        self._trapButton = rectangle.Rectangle(config.Config.UPGRADEBUTTON_TRAP_POSITION,
+                                                 config.Config.UPGRADEBUTTON_TRAP_WIDTH,
+                                                 config.Config.UPGRADEBUTTON_TRAP_HEIGHT,
+                                                 config.Config.UPGRADEBUTTON_TRAP_IMAGE)
         self._FPS = False
         self._shift = False
+        self._insideDamageButton = False
+        self._insideRangeButton = False
+        self._insideEffectButton = False
+        self._insideTrapButton = False
         self._cash = config.Config.PLAYER_CASH
         self._player = player
         self._timer = 0
@@ -50,6 +76,10 @@ class TowerDefense:
             raise
  
         self._player_map = player_map
+
+
+    def getPlayer(self):
+        return self._player
 
     def addTower(self, newTower):
         self._towerList.append(newTower)
@@ -92,7 +122,6 @@ class TowerDefense:
 
     def getFirstDir(self):
         spawnPosI, spawnPosJ = self.getSpawnPosition()
-        print(self.getSpawnPosition())
         if self._matrix[spawnPosI + 1][spawnPosJ] == config.Config.MAP_NUMBMATRIX_CENTRALPATH:
             return 'D'
         elif self._matrix[spawnPosI - 1][spawnPosJ] == config.Config.MAP_NUMBMATRIX_CENTRALPATH:
@@ -115,7 +144,8 @@ class TowerDefense:
         self._enemieTimer = 1
 
     def delEnemie(self, enemie):
-        self._enemiesList.remove(enemie)
+        if self._enemiesList.__contains__(enemie):
+            self._enemiesList.remove(enemie)
 
     def getEnemies(self):
         return self._enemiesList
@@ -138,14 +168,57 @@ class TowerDefense:
     def isPurchasingTrap(self):
         return self._purchasingTrap
 
-    def turnOnClickedInTowerOrTrap(self):
-        self._clickedInTowerOrTrap = True
+    def turnOnClickedInTower(self):
+        self._clickedInTower = True
 
-    def turnOffClickedInTowerOrTrap(self):
-        self._clickedInTowerOrTrap = False
+    def turnOffClickedInTower(self):
+        self._clickedInTower = False
 
-    def isClickedInTowerOrTrap(self):
-        return self._clickedInTowerOrTrap
+    def isClickedInTower(self):
+        return self._clickedInTower
+
+    def turnOnClickedInTrap(self):
+        self._clickedInTrap = True
+
+    def turnOffClickedInTrap(self):
+        self._clickedInTrap = False
+
+    def isClickedInTrap(self):
+        return self._clickedInTrap
+
+    def towerInsideButton(self, mousePosition):
+        if self._insideDamageButton:
+            if not self._damageButton.isInside(mousePosition):
+                self._damageButton.setImage(config.Config.UPGRADEBUTTON_DAMAGE_IMAGE)
+                self._insideDamageButton = False
+        elif self._damageButton.isInside(mousePosition):
+            self._damageButton.setImage(config.Config.UPGRADEBUTTON_DAMAGE_MOUSEINSIDE_IMAGE)
+            self._insideDamageButton = True
+
+        if self._insideRangeButton:
+            if not self._rangeButton.isInside(mousePosition):
+                self._rangeButton.setImage(config.Config.UPGRADEBUTTON_RANGE_IMAGE)
+                self._insideRangeButton = False
+        elif self._rangeButton.isInside(mousePosition):
+            self._rangeButton.setImage(config.Config.UPGRADEBUTTON_RANGE_MOUSEINSIDE_IMAGE)
+            self._insideRangeButton = True
+
+        if self._insideEffectButton:
+            if not self._effectButton.isInside(mousePosition):
+                self._effectButton.setImage(config.Config.UPGRADEBUTTON_EFFECT_IMAGE)
+                self._insideEffectButton = False
+        elif self._effectButton.isInside(mousePosition):
+            self._effectButton.setImage(config.Config.UPGRADEBUTTON_EFFECT_MOUSEINSIDE_IMAGE)
+            self._insideEffectButton = True
+
+    def trapInsideButton(self, mousePosition):
+        if self._insideTrapButton:
+            if not self._trapButton.isInside(mousePosition):
+                self._trapButton.setImage(config.Config.UPGRADEBUTTON_TRAP_IMAGE)
+                self._insideTrapButton = False
+        elif self._trapButton.isInside(mousePosition):
+            self._trapButton.setImage(config.Config.UPGRADEBUTTON_TRAP_MOUSEINSIDE_IMAGE)
+            self._insideTrapButton = True
 
     def executePurchasingTower(self, gameDisplay, mousePosition):
         for i in range(0, self.getRectMap().getDimension()[0]):
@@ -186,9 +259,27 @@ class TowerDefense:
                     else:
                         self.selectedObject.paintRange(gameDisplay, config.Config.NOT_COLLIDE_COLOR)
 
-    def executeClickedInTowerOrTrap(self, gameDisplay):
+    def executeClickedInTower(self, gameDisplay, mousePosition):
         self.selectedObject.paintRange(gameDisplay, config.Config.GREEN)
         self.selectedObject.paintAtributes(gameDisplay)
+        self._damageButton.paint(gameDisplay)
+        self._rangeButton.paint(gameDisplay)
+        self._effectButton.paint(gameDisplay)
+        if self._insideDamageButton:
+            self.paintMessage(gameDisplay, mousePosition, "Price:%.1f" % self.selectedObject.getUpgradeDamagePrice())
+        elif self._insideRangeButton:
+            self.paintMessage(gameDisplay, mousePosition, "Price:%.1f" % self.selectedObject.getUpgradeRangePrice())
+        elif self._insideEffectButton:
+            self.paintMessage(gameDisplay, mousePosition, "Price:%.1f" % self.selectedObject.getUpgradeEffectPrice())
+        elif self._insideTrapButton:
+            self.paintMessage(gameDisplay, mousePosition, "Price:%.1f" % self.selectedObject.getPriceToUpgrade())
+
+    def executeClickedInTrap(self, gameDisplay, mousePosition):
+        self.selectedObject.paintRange(gameDisplay, config.Config.GREEN)
+        self.selectedObject.paintAtributes(gameDisplay)
+        self._trapButton.paint(gameDisplay)
+        if self._insideTrapButton:
+            self.paintMessage(gameDisplay, mousePosition, "Price:%.1f" % self.selectedObject.getPriceToUpgrade())
 
     def getRectMap(self):
         return self._rectMap
@@ -242,10 +333,24 @@ class TowerDefense:
                         self.turnOffPurchasingTrap()
                         self.paintHaveNoCashMess(gameDisplay, mousePosition)
                         self._timer = 3
-        elif self.isInsideTowerOrTrap(mousePosition):
-            self.turnOnClickedInTowerOrTrap()
-        elif self.isClickedInTowerOrTrap():
-            self.turnOffClickedInTowerOrTrap()
+        elif self.isInsideTower(mousePosition):
+            self.turnOnClickedInTower()
+        elif self.isInsideTrap(mousePosition):
+            self.turnOnClickedInTrap()
+        elif self.isClickedInTower():
+            if self._damageButton.isInside(mousePosition):
+                self.selectedObject.upgradeDamage()
+            elif self._rangeButton.isInside(mousePosition):
+                self.selectedObject.upgradeRange()
+            elif self._effectButton.isInside(mousePosition):
+                self.selectedObject.upgradeEffect()
+            else:
+                self.turnOffClickedInTower()
+        elif self.isClickedInTrap():
+            if self._trapButton.isInside(mousePosition):
+                self.selectedObject.upgrade()
+            else:
+                self.turnOffClickedInTrap()
         elif self.isInsideBuying(mousePosition): #EFEITO COLATERAL - arrumar
             if self.selectedObject.getFirstClass() == "Tower":
                 self.turnOnPurchasingTower()
@@ -288,21 +393,31 @@ class TowerDefense:
         if mousePosition[0] < 480:
             return False
         else:
-            for i in range(0, 2):
+            for i in range(0, 4):
                 if self._buyingTowers[i].isInside(mousePosition):
                     towerClass = self._buyingTowers[i].getClass()
                     if towerClass == "ClassicTowerBuyer":
                         self.selectedObject = towers.ClassicTower((0, 0))
                     elif towerClass == "BlueTowerBuyer":
                         self.selectedObject = towers.BlueTower((0, 0))
+                    elif towerClass == "PoisonTowerBuyer":
+                        self.selectedObject = towers.PoisonTower((0, 0))
+                    elif towerClass == "ThunderTowerBuyer":
+                        self.selectedObject = towers.ThunderTower((0, 0))
                     return True
-            for i in range(0, 2):
+            for i in range(0, 4):
                 if self._buyingTraps[i].isInside(mousePosition):
                     trapClass = self._buyingTraps[i].getClass()
+                    print(trapClass)
                     if trapClass == "FireTrapBuyer":
                         self.selectedObject = traps.FireTrap((0, 0))
                     elif trapClass == "IceTrapBuyer":
                         self.selectedObject = traps.IceTrap((0, 0))
+                    elif trapClass == "ThunderTrapBuyer":
+                        print("ENTREI")
+                        self.selectedObject = traps.ThunderTrap((0, 0))
+                    elif trapClass == "PoisonTrapBuyer":
+                        self.selectedObject = traps.PoisonTrap((0, 0))
                     return True
         return False
 
@@ -335,8 +450,10 @@ class TowerDefense:
         elif self.isPurchasingTrap():
             self.executePurchasingTrap(gameDisplay, mousePosition)
         self.paintTowerMenuBackground(gameDisplay)
-        if self.isClickedInTowerOrTrap():
-            self.executeClickedInTowerOrTrap(gameDisplay)
+        if self.isClickedInTower():
+            self.executeClickedInTower(gameDisplay, mousePosition)
+        if self.isClickedInTrap():
+            self.executeClickedInTrap(gameDisplay, mousePosition)
         self.paintBuyingTowers(gameDisplay)
         self.paintBuyingTraps(gameDisplay)
         self.paintCash(gameDisplay)
@@ -396,6 +513,11 @@ class TowerDefense:
         font = pygame.font.SysFont(None, 30, True, False)
         text = font.render("Not enougth cash!", True, (255, 255, 0))
         gameDisplay.blit(text, mousePosition)
+
+    def paintMessage(self, gameDisplay, mousePosition, message):
+        font = pygame.font.SysFont(None, 30, True, False)
+        text = font.render(message, True, ((0, 0, 255)))
+        gameDisplay.blit(text, (mousePosition[0]-50, mousePosition[1]-20))
 
     def paintLife(self, gameDisplay):
         font = pygame.font.SysFont(None, 25)

@@ -1,4 +1,5 @@
 import rectangle
+import config
 
 class Shot(rectangle.Rectangle):
     def __init__(self, position, width, height, image, speed, targetPosition, damage, effect):
@@ -32,5 +33,38 @@ class Shot(rectangle.Rectangle):
 
     def destroy(self, tower):
         tower.delShot(self)
+
+class IceShot(Shot):
+    def __init__(self, position, damage, targetPosition, effect):
+        super(IceShot, self).__init__(position,
+                                      config.Config.ICESHOT_WIDTH,
+                                      config.Config.ICESHOT_HEIGHT,
+                                      config.Config.ICESHOT_IMAGE,
+                                      config.Config.ICESHOT_SPEED,
+                                      targetPosition,
+                                      damage,
+                                      effect)
+
+class PoisonShot(Shot):
+    def __init__(self, position, damage, targetPosition, effect):
+        super(PoisonShot, self).__init__(position,
+                                      config.Config.POISONSHOT_WIDTH,
+                                      config.Config.POISONSHOT_HEIGHT,
+                                      config.Config.POISONSHOT_IMAGE,
+                                      config.Config.POISONSHOT_SPEED,
+                                      targetPosition,
+                                      damage,
+                                      effect)
+
+class ThunderShot(Shot):
+    def __init__(self, position, damage, targetPosition, effect):
+        super(ThunderShot, self).__init__(position,
+                                      config.Config.THUNDERSHOT_WIDTH,
+                                      config.Config.THUNDERSHOT_HEIGHT,
+                                      config.Config.THUNDERSHOT_IMAGE,
+                                      config.Config.THUNDERSHOT_SPEED,
+                                      targetPosition,
+                                      damage,
+                                      effect)
 
 

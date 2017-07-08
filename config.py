@@ -21,7 +21,7 @@ class Config:
     PLAYER_LIFE = 50
     MENUTOWERS_IMAGE = "imagens/undo-menu-ingame.png"
     CREATIONMODE_IMAGE = "imagens/creation_menu.png"
-    
+
     GRASS_IMAGE = "imagens/grass_outlined.png"
 
 
@@ -31,13 +31,37 @@ class Config:
     MENU_HEIGHT = 480
 
     MAIN_MENU_IMAGE = "imagens/main_menu.png"
-    
+
     GRASS_IMAGE = "imagens/grass_outlined.png"
 
     MAIN_MENU_FONT = "fonts/Colleged.ttf"
     MENU_POINTER_2 = "imagens/demonho.png"
-    
-   
+
+    #BUTTONS
+    UPGRADEBUTTON_DAMAGE_POSITION = (493, 323)
+    UPGRADEBUTTON_DAMAGE_WIDTH = 100
+    UPGRADEBUTTON_DAMAGE_HEIGHT = 64
+    UPGRADEBUTTON_DAMAGE_IMAGE = "imagens/damageupgrade.png"
+    UPGRADEBUTTON_DAMAGE_MOUSEINSIDE_IMAGE = "imagens/damageupgrade2.png"
+
+    UPGRADEBUTTON_RANGE_POSITION = (590, 323)
+    UPGRADEBUTTON_RANGE_WIDTH = 100
+    UPGRADEBUTTON_RANGE_HEIGHT = 64
+    UPGRADEBUTTON_RANGE_IMAGE = "imagens/rangeupgrade.png"
+    UPGRADEBUTTON_RANGE_MOUSEINSIDE_IMAGE = "imagens/rangeupgrade2.png"
+
+    UPGRADEBUTTON_EFFECT_POSITION = (688, 323)
+    UPGRADEBUTTON_EFFECT_WIDTH = 100
+    UPGRADEBUTTON_EFFECT_HEIGHT = 64
+    UPGRADEBUTTON_EFFECT_IMAGE = "imagens/effectupgrade.png"
+    UPGRADEBUTTON_EFFECT_MOUSEINSIDE_IMAGE = "imagens/effectupgrade2.png"
+
+    UPGRADEBUTTON_TRAP_POSITION = (493, 323)
+    UPGRADEBUTTON_TRAP_WIDTH = 100
+    UPGRADEBUTTON_TRAP_HEIGHT = 64
+    UPGRADEBUTTON_TRAP_IMAGE = "imagens/trapupgrade.png"
+    UPGRADEBUTTON_TRAP_MOUSEINSIDE_IMAGE = "imagens/trapupgrade2.png"
+
     #spawns
     SPAWN_IMAGE = "imagens/spawn.png"
     DESPAWN_IMAGE = "imagens/despawn.png"
@@ -79,11 +103,12 @@ class Config:
     BLUETOWER_IMAGE_big = "imagens/lue-grande.png"
     BLUETOWER_WIDTH = 32
     BLUETOWER_HEIGHT = 32
-    BLUETOWER_RANGE = 64
-    BLUETOWER_DAMAGE = 50
-    BLUETOWER_FIRERATE = 1.0
+    BLUETOWER_RANGE = 80
+    BLUETOWER_DAMAGE = 10
+    BLUETOWER_FIRERATE = 0.5
     BLUETOWER_PRICE = 100
     BLUETOWER_BUYER_POS = (567, 13)
+
     CLASSICTOWER_IMAGE_small = "imagens/sic.png"
     CLASSICTOWER_IMAGE_big = "imagens/sic-grande.png"
     CLASSICTOWER_WIDTH = 32
@@ -91,22 +116,74 @@ class Config:
     CLASSICTOWER_RANGE = 96
     CLASSICTOWER_DAMAGE = 25
     CLASSICTOWER_FIRERATE = 1.0
-    CLASSICTOWER_PRICE = 50
+    CLASSICTOWER_PRICE = 60
     CLASSICTOWER_BUYER_POS = (493, 13)
+
+    POISONTOWER_IMAGE_small = "imagens/poisontower_small.png"
+    POISONTOWER_IMAGE_big = "imagens/poisontower_big.png"
+    POISONTOWER_WIDTH = 32
+    POISONTOWER_HEIGHT = 32
+    POISONTOWER_RANGE = 96
+    POISONTOWER_DAMAGE = 15
+    POISONTOWER_FIRERATE = 0.25
+    POISONTOWER_PRICE = 45
+    POISONTOWER_BUYER_POS = (642, 13)
+
+    THUNDERTOWER_IMAGE_small = "imagens/thundertower_small.png"
+    THUNDERTOWER_IMAGE_big = "imagens/thundertower_big.png"
+    THUNDERTOWER_WIDTH = 32
+    THUNDERTOWER_HEIGHT = 32
+    THUNDERTOWER_RANGE = 70
+    THUNDERTOWER_DAMAGE = 25
+    THUNDERTOWER_FIRERATE = 1.0
+    THUNDERTOWER_PRICE = 120
+    THUNDERTOWER_BUYER_POS = (722, 13)
+
+    #SHOTS
+    ##ICESHOT
+    ICESHOT_WIDTH = 8
+    ICESHOT_HEIGHT = 8
+    ICESHOT_IMAGE = "imagens/iceshot.png"
+    ICESHOT_SPEED = 0.5
+
+    THUNDERSHOT_WIDTH = 8
+    THUNDERSHOT_HEIGHT = 8
+    THUNDERSHOT_IMAGE = "imagens/thundershot.png"
+    THUNDERSHOT_SPEED = 0.5
+
+    POISONSHOT_WIDTH = 8
+    POISONSHOT_HEIGHT = 8
+    POISONSHOT_IMAGE = "imagens/poisonshot.png"
+    POISONSHOT_SPEED = 0.5
 
     #TRAPS
     FIRETRAP_IMAGE = "imagens/firetrap3.png"
     FIRETRAP_WIDTH = 16
     FIRETRAP_HEIGHT = 16
     FIRETRAP_DAMAGE = 15
-    FIRETRAP_PRICE = 75
-    FIRETRAP_BUYER_POS = (505, 108)
+    FIRETRAP_PRICE = 125
+    FIRETRAP_BUYER_POS = (513, 120)
+
     ICETRAP_IMAGE = "imagens/icetrap.png"
     ICETRAP_WIDTH = 16
     ICETRAP_HEIGHT = 16
     ICETRAP_DAMAGE = 15
-    ICETRAP_PRICE = 100
-    ICETRAP_BUYER_POS = (595, 108)
+    ICETRAP_PRICE = 180
+    ICETRAP_BUYER_POS = (591, 120)
+
+    THUNDERTRAP_IMAGE = "imagens/thundertrap.png"
+    THUNDERTRAP_WIDTH = 16
+    THUNDERTRAP_HEIGHT = 16
+    THUNDERTRAP_DAMAGE = 15
+    THUNDERTRAP_PRICE = 180
+    THUNDERTRAP_BUYER_POS = (665, 120)
+
+    POISONTRAP_IMAGE = "imagens/poisontrap.png"
+    POISONTRAP_WIDTH = 16
+    POISONTRAP_HEIGHT = 16
+    POISONTRAP_DAMAGE = 15
+    POISONTRAP_PRICE = 150
+    POISONTRAP_BUYER_POS = (745, 120)
 
     #EFFECTS
     ##BURN
@@ -119,6 +196,15 @@ class Config:
     ICEEFFECT_DURATION = 3
     ICEEFFECT_SLOW = 1.0
 
+    ##POISON
+    POISONEFFECT_NAME = "Poison"
+    POISONEFFECT_DURATION = 10
+    POISONEFFECT_DAMAGEPERSECOND = 3
+
+    ##THUNDER
+    THUNDEREFFECT_NAME = "Thunder"
+    THUNDEREFFECT_DURATION = 1
+
     #ENEMIES
     ENEMIE_SPAWNPOSITION = (0, 160)
     ENEMIE_IMAGE = "imagens/enemy.png"
@@ -126,5 +212,5 @@ class Config:
     ENEMIE_HEIGHT = 16
     ENEMIE_HEALTH = 30
     ENEMIE_SPEED = 2.0 # ENTRE 1 E !0
-    ENEMIE_EARNCASH = 0
-    ENEMIE_LIFESWILLTOOK = 0
+    ENEMIE_EARNCASH = 6
+    ENEMIE_LIFESWILLTOOK = 1

@@ -101,7 +101,6 @@ class Enemie(rectangle.Rectangle):
 
     def setEffect(self, effect):
         if effect.getName() == "Ice":
-            print("entrei")
             self.setIce(effect)
         elif effect.getName() == "Burn":
             self.setBurn(effect)
@@ -121,6 +120,8 @@ class Enemie(rectangle.Rectangle):
     def executeEffects(self, towerDefense):
         for effectAux in self._specialEffects:
             if effectAux.getName() == "Burn":
+                self.hit(effectAux.getDamagePerSecond(), towerDefense)
+            elif effectAux.getName() == "Poison":
                 self.hit(effectAux.getDamagePerSecond(), towerDefense)
             effectAux.decDuration()
 
