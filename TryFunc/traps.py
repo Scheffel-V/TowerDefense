@@ -1,8 +1,10 @@
+# Almost Ok, still need to convert into functional, perhaps we should make high-order functions here
 import rectangle
 import abc
 import config
 import pygame
 import effects
+from func import *
 
 class Trap(rectangle.Rectangle):
     _mouseCircleSurface = pygame.Surface(config.Config.MOUSE_CIRCLE_SURFACE)
@@ -12,6 +14,8 @@ class Trap(rectangle.Rectangle):
         self._damage = damage
         self._reloadTime = 2.0
         self._price = price
+        self._level = 1
+        self._priceToUpgrade = 100
 
     def getFirstClass(self):
         return "Trap"
@@ -23,6 +27,14 @@ class Trap(rectangle.Rectangle):
     @abc.abstractmethod
     def newCopy(self):
         return
+
+    @abc.abstractmethod
+    def shot(self, enemie):
+        pass
+
+    def upgrade(self):
+        self._level += 1
+        self._priceToUpgrade = self._priceToUpgrade + (self._level - 1) * 50
 
     def getDamage(self):
         return self._damage
@@ -39,6 +51,12 @@ class Trap(rectangle.Rectangle):
     def doublePrice(self):
         self._price = self._price * 2
 
+    def getLevel(self):
+        return self._level
+
+    def getPriceToUpgrade(self):
+        return self._priceToUpgrade
+
     def decReloadTime(self):
         self._reloadTime -= 2.0
 
@@ -46,13 +64,19 @@ class Trap(rectangle.Rectangle):
         self._reloadTime = 3
     #print self._reloadTime
 
+    ###############   shotEnemy replaced
+    def shotEnemies2(self, listOfEnemies):
+        if not(is_empty(listOfEnemies)):
+            if(self.collide(first(listOfEnemies))):
+                self.shot(first(listOfEnemies))
+                self.resetReloadTime()
+            else:
+                self.shotEnemies2(rest(listOfEnemies))
+
     def shotEnemies(self, enemies, towerDefense):
         if self._reloadTime <= 0:
-            for enemieAux in enemies:
-                if self.collide(enemieAux):
-                    self.shot(enemieAux)
-                    self.resetReloadTime()
-                    break
+            self.shotEnemies2(enemies)
+###############
 
     def paintRange(self, gameDisplay, color):
         self._mouseCircleSurface.fill(config.Config.CK)
@@ -61,10 +85,10 @@ class Trap(rectangle.Rectangle):
         self._mouseCircleSurface.set_alpha(150)
         gameDisplay.blit(self._mouseCircleSurface, (0, 0))
 
+    @abc.abstractmethod
     def paintAtributes(self, gameDisplay):
-        font = pygame.font.SysFont(None, 25, True, False)
-        text = font.render("Damage:%d" % self._damage, True, (0, 0, 0))
-        gameDisplay.blit(text, (497, 177))
+        pass
+
 
 class FireTrap(Trap):
     def __init__(self, position):
@@ -82,8 +106,15 @@ class FireTrap(Trap):
         return FireTrap(self._position)
 
     def shot(self, enemie):
-        burnEffect = effects.BurnEffect(enemie)
+        burnEffect = effects.BurnEffect(enemie, self.getLevel())
         enemie.setBurn(burnEffect)
+
+    def paintAtributes(self, gameDisplay):
+        font = pygame.font.SysFont(None, 25, True, False)
+        text = font.render("Damage per second:%d" % (config.Config.BURNEFFECT_DAMAGEPERSECOND * (1.3 ** (self.getLevel() - 1))), True, (0, 0, 0))
+        text2 = font.render("Duration:%d" % (config.Config.BURNEFFECT_DURATION + self.getLevel()), True, (0, 0, 0))
+        gameDisplay.blit(text, (497, 177))
+        gameDisplay.blit(text2, (497, 197))
 
 
 class FireTrapBuyer(Trap):
@@ -101,6 +132,13 @@ class FireTrapBuyer(Trap):
     def newCopy(self):
         return FireTrapBuyer(self._position)
 
+    def shot(self, enemie):
+        pass
+
+    def paintAtributes(self, gameDisplay):
+        pass
+
+
 class IceTrap(Trap):
     def __init__(self, position):
         super(IceTrap, self).__init__(position,
@@ -117,8 +155,13 @@ class IceTrap(Trap):
         return IceTrap(self._position)
 
     def shot(self, enemie):
-        iceEffect = effects.IceEffect(enemie)
+        iceEffect = effects.IceEffect(enemie, self.getLevel())
         enemie.setIce(iceEffect)
+
+    def paintAtributes(self, gameDisplay):
+        font = pygame.font.SysFont(None, 25, True, False)
+        text2 = font.render("Duration:%d" % (config.Config.ICEEFFECT_DURATION + self.getLevel()), True, (0, 0, 0))
+        gameDisplay.blit(text2, (497, 177))
 
 
 class IceTrapBuyer(Trap):
@@ -135,3 +178,100 @@ class IceTrapBuyer(Trap):
 
     def newCopy(self):
         return IceTrapBuyer(self._position)
+
+    def paintAtributes(self, gameDisplay):
+        pass
+
+class ThunderTrap(Trap):
+    def __init__(self, position):
+        super(ThunderTrap, self).__init__(position,
+                                       config.Config.THUNDERTRAP_WIDTH,
+                                       config.Config.THUNDERTRAP_HEIGHT,
+                                       config.Config.THUNDERTRAP_IMAGE,
+                                       config.Config.THUNDERTRAP_DAMAGE,
+                                       config.Config.THUNDERTRAP_PRICE)
+
+    def getClass(self):
+        return "ThunderTrap"
+
+    def newCopy(self):
+        return ThunderTrap(self._position)
+
+    def shot(self, enemie):
+        thunderEffect = effects.ThunderEffect(enemie, self.getLevel())
+        enemie.setThunder(thunderEffect)
+
+    def paintAtributes(self, gameDisplay):
+        font = pygame.font.SysFont(None, 25, True, False)
+        text2 = font.render("Duration:%d" % (config.Config.THUNDEREFFECT_DURATION + self.getLevel()), True, (0, 0, 0))
+        gameDisplay.blit(text2, (497, 177))
+
+
+class ThunderTrapBuyer(Trap):
+    def __init__(self, position):
+        super(ThunderTrapBuyer, self).__init__(position,
+                                           config.Config.THUNDERTRAP_WIDTH,
+                                           config.Config.THUNDERTRAP_HEIGHT,
+                                           config.Config.THUNDERTRAP_IMAGE,
+                                           config.Config.THUNDERTRAP_DAMAGE,
+                                           config.Config.THUNDERTRAP_PRICE)
+
+    def getClass(self):
+        return "ThunderTrapBuyer"
+
+    def newCopy(self):
+        return ThunderTrapBuyer(self._position)
+
+    def shot(self, enemie):
+        pass
+
+    def paintAtributes(self, gameDisplay):
+        pass
+
+
+class PoisonTrap(Trap):
+    def __init__(self, position):
+        super(PoisonTrap, self).__init__(position,
+                                       config.Config.POISONTRAP_WIDTH,
+                                       config.Config.POISONTRAP_HEIGHT,
+                                       config.Config.POISONTRAP_IMAGE,
+                                       config.Config.POISONTRAP_DAMAGE,
+                                       config.Config.POISONTRAP_PRICE)
+
+    def getClass(self):
+        return "PoisonTrap"
+
+    def newCopy(self):
+        return PoisonTrap(self._position)
+
+    def shot(self, enemie):
+        poisonEffect = effects.PoisonEffect(enemie, self.getLevel())
+        enemie.setPoison(poisonEffect)
+
+    def paintAtributes(self, gameDisplay):
+        font = pygame.font.SysFont(None, 25, True, False)
+        text = font.render("Damage per second:%d" % (config.Config.POISONEFFECT_DAMAGEPERSECOND * (1.25 ** (self.getLevel() - 1))), True, (0, 0, 0))
+        text2 = font.render("Duration:%d" % (config.Config.POISONEFFECT_DURATION + 2 * self.getLevel()), True, (0, 0, 0))
+        gameDisplay.blit(text, (497, 177))
+        gameDisplay.blit(text2, (497, 197))
+
+class PoisonTrapBuyer(Trap):
+    def __init__(self, position):
+        super(PoisonTrapBuyer, self).__init__(position,
+                                           config.Config.POISONTRAP_WIDTH,
+                                           config.Config.POISONTRAP_HEIGHT,
+                                           config.Config.POISONTRAP_IMAGE,
+                                           config.Config.POISONTRAP_DAMAGE,
+                                           config.Config.POISONTRAP_PRICE)
+
+    def getClass(self):
+        return "PoisonTrapBuyer"
+
+    def newCopy(self):
+        return PoisonTrapBuyer(self._position)
+
+    def shot(self, enemie):
+        pass
+
+    def paintAtributes(self, gameDisplay):
+        pass

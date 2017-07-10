@@ -1,17 +1,19 @@
 import config
 import pygame
 import sys
-import map as map2
+import map
 import rectangle
 from sys import argv
+import os
 
 class MapCreator:
-	def __init__(self):
+	def __init__(self, filemap=None):
 		self._conf = config.Config()
 		self._screen = pygame.display.set_mode(self._conf.DISPLAY_SIZE)
 		self._matrix = [[0 for aux in range(self._conf.MAP_DIMX)] for aux2 in range(self._conf.MAP_DIMY)]
-		self._rectMap = map2.Map2(self._conf.MAP_DIMS, self._conf.RECT_DIMS_px, self._matrix, 'creation')
+		self._rectMap = map.Map(self._conf.MAP_DIMS, self._conf.RECT_DIMS_px, self._matrix, 'creation')
 		self._currentValue = 1
+		self._filemap = filemap
 
 	def getCurrentValue(self):
 		return self._currentValue
@@ -53,7 +55,13 @@ class MapCreator:
 			pass
 
 	def getMatrixElement(self,x,y):
-		pass
+		try:
+			element = self.getMatrix()[x][y]
+		except IndexError:
+			printf("Por favor insira um x e y valido")
+			raise
+
+		return element
 
 	def setWindowCaption(self, string):
 		pygame.display.set_caption(string)
@@ -65,21 +73,51 @@ class MapCreator:
 			return (xPos, yPos)
 		pass
 
+	def getNewFileName(self):
+
+		if self._filemap != None:
+			return self._filemap
+
+		maps = os.listdir("maps")
+
+		if maps == []:
+			return 'maps/map1.map'
+
+		all_index = []
+		for mapa in maps:
+			name = mapa.split('/')[-1]
+			index = int(name.split('.')[0][3:])
+			all_index.append(index)
+
+		return 'maps/map' + str(max(all_index)+1) + '.map'
+
+
 	def saveMatrix(self):
-		print("Saving map...")
 
 		try:
 			filename = 'maps/' + argv[1]
 		except IndexError:
-			filename = 'maps/map1.map'
+			filename = self.getNewFileName()
 			pass
-		
-		file = open(filename, 'w') #TODO: Better saving naming options
+		print("Saving map as " + filename)
+		file = open(filename, 'w') 
 
 		for line in self.getMatrix():
 			file.write(str(line)+'\n')
 
 		file.close()
+
+	def loadMap(self, player_map):
+
+		if player_map.split('.')[-1] != 'map':
+			print("Por favor insira um arquivo do tipo .map")
+			raise
+
+		f = open(player_map)
+		self._matrix = []
+		for line in f.readlines():
+			self._matrix.append([int(x) for x in line.strip('[]\n').split(',')])
+
 
 	#TODO: @Otavio -> Tirar as coisas hardcoded
 	def _handleMenuClick(self, pos):
@@ -103,7 +141,7 @@ class MapCreator:
 		return False
 
 	def _updateRectMap(self):
-		self.setRectMap(map2.Map2(self.getConf().MAP_DIMS, self.getConf().RECT_DIMS_px, self._matrix, 'creation'))
+		self.setRectMap(map.Map(self.getConf().MAP_DIMS, self.getConf().RECT_DIMS_px, self._matrix, 'creation'))
 		for i in range(0, self.getRectMap().getDimension()[0]):
 			for j in range(0, self.getRectMap().getDimension()[1]):
 				self.getRectMap().getMap()[i][j][1].paint(self.getScreen())
@@ -169,8 +207,8 @@ class MapCreator:
 			self._show()
 
 
-if __name__ == '__main__':
-	mapcreator = MapCreator()
-	mapcreator.setWindowCaption("Map Creation Window !")
-	mapcreator.start()
+# if __name__ == '__main__':
+# 	mapcreator = MapCreator()
+# 	mapcreator.setWindowCaption("Map Creation Window !")
+# 	mapcreator.start()
 	

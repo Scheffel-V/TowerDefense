@@ -1,8 +1,8 @@
-# OK
+#OK
 # coding=utf-8
 import rectangle
 import config
-from func import *
+from func import*
 # Classe Map:
 # Define o mapa do jogo (os quadradinhos verdes).
 # Varia em função do número de quadradinhos na altura e largura,
@@ -47,9 +47,9 @@ class Map2:
             changeDirImg = config.Config.REGULAR_PATH_IMAGE
 
             imageList =[grassImg,regPathImg,spawnImg,desPawnImg,centralPathImg,changeDirImg] # Cause the subfunctions couldn't see these atributes
-                                                                                             # it was needed pass them to the subfuncionts
+                                                                                            # it was needed pass them to the subfuncionts
         self._map2 = createMap(matrix,self.getRectWidth(),self.getRectHeight(),imageList)
-       
+        print("saddsa")
 
 
 def transformLineInMap(line_matrix, x, y,widht,height,imageList):
