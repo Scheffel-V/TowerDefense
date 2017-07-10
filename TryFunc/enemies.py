@@ -1,6 +1,7 @@
+#OK
 import rectangle
 import config
-
+from func import *
 
 class Enemie(rectangle.Rectangle):
     def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir, multiplier):
@@ -63,87 +64,122 @@ class Enemie(rectangle.Rectangle):
         if not self.isBurned():
             self._specialEffects.append(burnEffect)
 
-    def isBurned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Burn":
-                return True
-        return False
 
     def setIce(self, iceEffect):
         if not self.isIced():
             self._specialEffects.append(iceEffect)
             self.slow(iceEffect.getSlow())
 
-    def isIced(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Ice":
-                return True
-        return False
 
     def setPoison(self, poisonEffect):
         if not self.isPoisoned():
             self._specialEffects.append(poisonEffect)
 
-    def isPoisoned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Poison":
-                return True
-        return False
 
     def setThunder(self, thunderEffect):
         if not self.isStunned():
             self._specialEffects.append(thunderEffect)
             self.stun()
 
+    def isIced(self):
+        frozzen = self.activator("Ice")
+        list_of_elements = list(self._specialEffects)
+        return self.isSomething(list_of_elements,frozzen)
+
+    def isBurned(self):
+        burned = self.activator("Burn")
+        list_of_elements = list(self._specialEffects)
+        return self.isSomething(list_of_elements,burned)
+
+    def isPoisoned(self):
+        poisoned = self.activator("Poison")
+        list_of_elements = list(self._specialEffects)
+        return self.isSomething(list_of_elements,poisoned)
+
     def isStunned(self):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Thunder":
-                return True
-        return False
+        stunned = self.activator("Thunder")
+        list_of_elements = list(self._specialEffects)
+        return self.isSomething(list_of_elements,stunned)
+    
+    def activator(self, name):
+        def stringComp(element): 
+            return element.getName() == name
+        return stringComp
+
+    def isSomething(self,list,func_activator):
+        if is_empty(list):
+            return False
+        if func_activator(first(list)):
+            return True
+        else:
+            return self.isSomething(rest(list), func_activator)
 
     def setEffect(self, effect):
-        if effect.getName() == "Ice":
+        if self.activator("Ice")(effect):
             self.setIce(effect)
-        elif effect.getName() == "Burn":
+        elif self.activator("Burn")(effect):
             self.setBurn(effect)
-        elif effect.getName() == "Poison":
+        elif self.activator("Poison")(effect):
             self.setPoison(effect)
-        elif effect.getName() == "Thunder":
+        elif self.activator("Thunder")(effect):
             self.setThunder(effect)
 
     def delEffect(self, effect):
-        if effect.getName() == "Ice":
+        if self.activator("Ice")(effect):
             self.refreshSpeed()
-        elif effect.getName() == "Thunder":
+        elif self.activator("Thunder")(effect):
             self.refreshSpeed()
         if self._specialEffects.__contains__(effect):
             self._specialEffects.remove(effect)
 
     def executeEffects(self, towerDefense):
-        for effectAux in self._specialEffects:
-            if effectAux.getName() == "Burn":
-                self.hit(effectAux.getDamagePerSecond(), towerDefense)
-            elif effectAux.getName() == "Poison":
-                self.hit(effectAux.getDamagePerSecond(), towerDefense)
-            effectAux.decDuration()
+        list_of_effects = list(self._specialEffects)
+        self.executeEffects2(list_of_effects,towerDefense)
+    
+    def executeEffects2(self,list,towerDefense):
+        if not(is_empty(list)):
+            if self.activator("Burn")(first(list)) :
+                self.hit(first(list).getDamagePerSecond(), towerDefense)
+            elif self.activator("Poison")(first(list)):
+                self.hit(first(list).getDamagePerSecond(), towerDefense)
+            first(list).decDuration()
+            self.executeEffects2( rest(list),towerDefense)
 
     def despawn(self, towerDefense):
         towerDefense.delEnemie(self)
 
     def insideRectPosition(self, rectMap):
-        for i in range(0, rectMap.getDimension()[0]):
-            for j in range(0, rectMap.getDimension()[1]):
-                if rectMap.getMap()[i][j][1].isInside(self.getCenter()):
-                    return i, j
+        actualMap = rectMap.getMap()
+        
+        index = self.insideRectPositionPerLine(actualMap,0)
+        return first(index),second(index)
+    
+    def insideRectPositionPerLine(self,actualMap,x):
+        if not(is_empty(actualMap)):
+            column = first(actualMap)
+            index = self.insideRectPositionPerColumn(column,x,0)
+            aux_index = self.insideRectPositionPerLine(rest(actualMap), x+1)
+            
+            return [first(index)*first(aux_index), second(index)*second(aux_index)]
+        else:
+            return [1,1]
+    
+    def insideRectPositionPerColumn(self,column,x,y):
+        if is_empty(column):
+            return [1,1]
+        elif second(first(column)).isInside(self.getCenter()):
+            return [x,y]
+        else:
+            return self.insideRectPositionPerColumn(rest(column),x,y+1)
 
     def _setInitialFlags(self, firstDir):
-        if firstDir[0] == "U":
+        if first(firstDir) == "U":
             self._upFlag = True
-        elif firstDir[0] == "D":
+        elif first(firstDir) == "D":
             self._downFlag = True
-        elif firstDir[0] == "R":
+        elif first(firstDir) == "R":
             self._rightFlag = True
-        elif firstDir[0] == "L":
+        elif first(firstDir) == "L":
             self._leftFlag = True
 
     def _setFlags(self, up, down, left, right):
@@ -158,8 +194,8 @@ class Enemie(rectangle.Rectangle):
     def move(self, mapMatrix, rectMap, towerDefense):
 
         rectPosition = self.insideRectPosition(rectMap)
-        rectPositionI = rectPosition[0]
-        rectPositionJ = rectPosition[1]
+        rectPositionI = first(rectPosition)
+        rectPositionJ = second(rectPosition)
         mapMatrixNextColumn = mapMatrix[rectPositionI][rectPositionJ + 1]
         mapMatrixPrevColumn = mapMatrix[rectPositionI][rectPositionJ - 1]
         mapMatrixNextRow = mapMatrix[rectPositionI + 1][rectPositionJ]
@@ -224,25 +260,25 @@ class Enemie(rectangle.Rectangle):
                or thirdCondition == config.Config.MAP_NUMBMATRIX_DESPAWN
 
     def moveRight(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
+        positionX = first(self._position)
+        positionY = second(self._position)
         positionX += self._speed
         self.setPosition((positionX, positionY))
 
     def moveLeft(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
+        positionX = first(self._position)
+        positionY = second(self._position)
         positionX -= self._speed
         self.setPosition((positionX, positionY))
 
     def moveDown(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
+        positionX = first(self._position)
+        positionY = second(self._position)
         positionY += self._speed
         self.setPosition((positionX, positionY))
 
     def moveUp(self):
-        positionX = self._position[0]
-        positionY = self._position[1]
+        positionX = first(self._position)
+        positionY = second(self._position)
         positionY -= self._speed
         self.setPosition((positionX, positionY))
