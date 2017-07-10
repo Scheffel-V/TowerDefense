@@ -1,5 +1,7 @@
+#ok
 import rectangle
 import config
+from func import*
 
 class Shot(rectangle.Rectangle):
     def __init__(self, position, width, height, image, speed, targetPosition, damage, effect):
@@ -22,14 +24,10 @@ class Shot(rectangle.Rectangle):
         return self._effect
 
     def calculateDirection(self, targetPosition):
-        vector = targetPosition[0] - self._position[0], targetPosition[1] - self._position[1]
-        vector = vector[0] / 4, vector[1] / 4
-        return vector
+        return (first(targetPosition) - first(self._position))/4, (second(targetPosition) - second(self._position))/4
 
     def move(self):
-        newPositionX = self._position[0] + self._direction[0]
-        newPositionY = self._position[1] + self._direction[1]
-        self.setPosition((newPositionX, newPositionY))
+        self.setPosition((first(self._position) + first(self._direction), second(self._position) + second(self._direction)))
 
     def destroy(self, tower):
         tower.delShot(self)

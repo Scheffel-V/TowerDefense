@@ -1,3 +1,4 @@
+#ok
 import config
 
 class Effect:

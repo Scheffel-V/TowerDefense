@@ -1,3 +1,4 @@
+#ok
 import enemies
 import config
 

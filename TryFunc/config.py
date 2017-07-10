@@ -1,3 +1,4 @@
+#ok
 # coding=utf-8
 # Classe Config:
 #   Determina todas as propriedades do jogo.

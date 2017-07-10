@@ -1,3 +1,4 @@
+#ok
 # coding=utf-8
 import pygame
 import config

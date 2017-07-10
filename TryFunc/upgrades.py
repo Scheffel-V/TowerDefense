@@ -1,3 +1,4 @@
+#ok
 import rectangle
 import pygame
 import config
@@ -39,11 +40,7 @@ class UpgradeDamageButton(UpgradeButton):
         player.purchaseObject(self._priceToUpgrade)
 
     def calculatePrice(self, damageLevel):
-        price = self.getPrice()
-        while damageLevel != 1:
-            price *= 2
-            damageLevel -= 1
-        return price
+        return self.getPrice() * 2**damageLevel
 
 
 
