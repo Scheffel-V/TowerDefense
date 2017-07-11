@@ -18,6 +18,7 @@ class MapCreator:
 		self._filemap = filemap
 		#self._matrix = self.createMatrixWithZeros(self._conf.MAP_DIMX, self._conf.MAP_DIMY)
 
+##----TENTATIVA FRACASSADA----------------------------------------------------------------
 	def createMatrixWithZeros(self, x, y):
 		return self.createMatrixColumn(self.createMatrixLane(x), y)
 
@@ -32,7 +33,7 @@ class MapCreator:
 			return []
 		else:
 			return cons(lane, self.createMatrixColumn(lane,y-1))
-
+##--------------------------------------------------------------------
 	def getCurrentValue(self):
 		return self._currentValue
 
@@ -89,28 +90,28 @@ class MapCreator:
 			return (xPos, yPos)
 		pass
 
+	def standardizeName (self, maps):
+		if is_empty(maps):
+			return []
+		else:
+			mapa = first(maps)
+			mapa = mapa.split('/')[-1]
+			mapa = int(mapa.split('.')[0][3:])
+			return cons(mapa, self.standardizeName(rest(maps)) )
+
 	def getNewFileName(self):
 		if self._filemap != None:
 			return self._filemap
 
 		maps = os.listdir("maps")
-
 		if is_empty(maps):
 			return 'maps/map1.map'
 
-		all_index = []
-		for mapa in maps:
-			name = mapa.split('/')[-1]
-			index = int(name.split('.')[0][3:])
-			all_index.append(index)
-		#maps = list(map(lambda x: x.split('/')[-1], maps))
-		#maps =list(map(lambda x: int(x.split('.')[0][3:]), maps))
-		#all_index = list(map(lambda x: cons(x, all_index), maps))
+		all_index = self.standardizeName(maps)
+
 		return 'maps/map' + str(max(all_index)+1) + '.map'
 
-
 	def saveMatrix(self):
-
 		try:
 			filename = 'maps/' + argv[1]
 		except IndexError:
@@ -135,8 +136,6 @@ class MapCreator:
 		for line in f.readlines():
 			self._matrix.append([int(x) for x in line.strip('[]\n').split(',')])
 
-
-	#TODO: @Otavio -> Tirar as coisas hardcoded
 	def _handleMenuClick(self, pos):
 		if self.getClickedSquare(pos) == None: #ou seja, se nenhum dos quadrados na tela foi apertado...
 			if second(pos) < 372 and second(pos) > 328:
@@ -155,7 +154,8 @@ class MapCreator:
 	def _isValidValue(self,value):
 		if value in self.getConf().MAP_NUMBMATRIX_VALUES:
 			return True
-		return False
+		else:
+			return False
 
 	def _updateRectMap(self):
 		self.setRectMap(map.Map2(self.getConf().MAP_DIMS, self.getConf().RECT_DIMS_px, self._matrix, 'creation'))
@@ -165,7 +165,6 @@ class MapCreator:
 
 	def _updateScreenBuffer(self):
 		self._updateRectMap()
-		#TODO: More things in here
 
 	def _show(self):
 		pygame.display.update()
@@ -222,10 +221,4 @@ class MapCreator:
 
 			self._updateScreenBuffer()
 			self._show()
-
-
-# if __name__ == '__main__':
-# 	mapcreator = MapCreator()
-# 	mapcreator.setWindowCaption("Map Creation Window !")
-# 	mapcreator.start()
 	
