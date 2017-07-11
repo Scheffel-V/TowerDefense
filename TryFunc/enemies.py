@@ -6,10 +6,10 @@ from func import *
 class Enemie(rectangle.Rectangle):
     def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir, multiplier):
         super(Enemie, self).__init__(position, width, height, image)
-        self._health = health
+        self._health = health * multiplier
         self._speed = speed
         self._originalSpeed = speed
-        self._earnCash = earnCash
+        self._earnCash = earnCash * multiplier
         self._lifesWillTook = lifesWillTook
         self._specialEffects = []
         self._upFlag = False
