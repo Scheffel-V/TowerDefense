@@ -8,6 +8,8 @@ import traps
 import enemies
 import rectangle
 import waves
+import time
+import menu as MENU
 
 
 # Classe TowerDefense:
@@ -27,6 +29,7 @@ class TowerDefense:
         self._purchasingTrap = False
         self._clickedInTower = False
         self._clickedInTrap = False
+        self._loseGame = False
         self._matrix = 0
         self._player_map = None
         self.setPlayerMap(player_map)
@@ -67,6 +70,7 @@ class TowerDefense:
         self._cash = config.Config.PLAYER_CASH
         self._player = player
         self._timer = 0
+        self._endTimer = 5
         self._enemieTimer = 1
         self._beginWaveTimer = 10
         self._enemieFirstDirection = self.getFirstDir()
@@ -455,30 +459,31 @@ class TowerDefense:
         return False
 
     def paintAllStuff(self, gameDisplay, mousePosition):
-        self.paintRectMap(gameDisplay)
-        self.paintTowers(gameDisplay)
-        self.paintTraps(gameDisplay)
-        if self.isPurchasingTower():
-            self.executePurchasingTower(gameDisplay, mousePosition)
-        elif self.isPurchasingTrap():
-            self.executePurchasingTrap(gameDisplay, mousePosition)
-        self.paintTowerMenuBackground(gameDisplay)
-        if self.isClickedInTower():
-            self.executeClickedInTower(gameDisplay, mousePosition)
-        if self.isClickedInTrap():
-            self.executeClickedInTrap(gameDisplay, mousePosition)
-        self.paintBuyingTowers(gameDisplay)
-        self.paintBuyingTraps(gameDisplay)
-        self.paintCash(gameDisplay)
-        self.paintLife(gameDisplay)
-        self.paintName(gameDisplay)
-        self.paintWave(gameDisplay)
-        if self.getTimer() > 0:
-            self.paintHaveNoCashMess(gameDisplay, mousePosition)
-        if self._enemieTimer == 0:
-            self.spawnEnemie()
-        self.paintShots(gameDisplay)
-        self.paintEnemies(gameDisplay)
+        if not self._loseGame:
+            self.paintRectMap(gameDisplay)
+            self.paintTowers(gameDisplay)
+            self.paintTraps(gameDisplay)
+            if self.isPurchasingTower():
+                self.executePurchasingTower(gameDisplay, mousePosition)
+            elif self.isPurchasingTrap():
+                self.executePurchasingTrap(gameDisplay, mousePosition)
+            self.paintTowerMenuBackground(gameDisplay)
+            if self.isClickedInTower():
+                self.executeClickedInTower(gameDisplay, mousePosition)
+            if self.isClickedInTrap():
+                self.executeClickedInTrap(gameDisplay, mousePosition)
+            self.paintBuyingTowers(gameDisplay)
+            self.paintBuyingTraps(gameDisplay)
+            self.paintCash(gameDisplay)
+            self.paintLife(gameDisplay)
+            self.paintName(gameDisplay)
+            self.paintWave(gameDisplay)
+            if self.getTimer() > 0:
+                self.paintHaveNoCashMess(gameDisplay, mousePosition)
+            if self._enemieTimer == 0:
+                self.spawnEnemie()
+            self.paintShots(gameDisplay)
+            self.paintEnemies(gameDisplay)
 
 
     def paintTowers(self, gameDisplay):
@@ -491,7 +496,7 @@ class TowerDefense:
 
     def paintEnemies(self, gameDisplay):
         for enemiesAux in self.getEnemies():
-            enemiesAux.move(self._matrix, self._rectMap, self)
+            enemiesAux.move(self._matrix, self._rectMap, self, gameDisplay)
             enemiesAux.paint(gameDisplay)
 
     def paintShots(self, gameDisplay):
@@ -533,6 +538,13 @@ class TowerDefense:
         text = font.render(message, True, ((0, 0, 255)))
         gameDisplay.blit(text, (mousePosition[0]-50, mousePosition[1]-20))
 
+    def paintLoseGameMessage(self, gameDisplay):
+        font = pygame.font.SysFont(None, 100, True, False)
+        text = font.render("YOU LOSE!", True, ((0, 0, 0)))
+        gameDisplay.blit(text, (100, 100))
+        text = font.render("WAVE:%d" % self._wave.getWaveNumber(), True, ((0, 0, 0)))
+        gameDisplay.blit(text, (100, 150))
+
     def paintLife(self, gameDisplay):
         font = pygame.font.SysFont(None, 25)
         text = font.render("LIFE: %d" % self._player.getLife(), True, (0, 0, 0))
@@ -557,29 +569,40 @@ class TowerDefense:
     def isShiftOn(self):
         return self._shift
 
-    def decTimer(self):
-        self._timer -= 1
+    def decTimer(self, gameDisplay):
+        if not self._loseGame:
+            self._timer -= 1
 
-        if self._beginWaveTimer == 0 and not self._waveOn:
-            self._wave.incWaveNumber()
-            self._waveOn = True
+            if self._beginWaveTimer == 0 and not self._waveOn:
+                self._wave.incWaveNumber()
+                self._waveOn = True
+            else:
+                if not self._enemiesList and (self._spawnEnemieCount == 10 or self._spawnEnemieCount == 0):
+                    self._waveOn = False
+                    self._spawnEnemieCount = 0
+                    self._beginWaveTimer -= 1
+
+            if self._waveOn:
+                self._enemieTimer -= 1
+
+            for towerAux in self.getTowers():
+                towerAux.decReloadTime()
+
+            for trapAux in self.getTraps():
+                trapAux.decReloadTime()
+
+            for enemieAux in self.getEnemies():
+                enemieAux.executeEffects(self)
         else:
-            if not self._enemiesList:
-                self._waveOn = False
-                self._spawnEnemieCount = 0
-                self._beginWaveTimer -= 1
+            self._endTimer -= 1
+            self.paintLoseGameMessage(gameDisplay)
+            if self._endTimer == 0:
+                pygame.quit()
+                menu = MENU.Menu()
+                menu.start()
 
-        if self._waveOn:
-            self._enemieTimer -= 1
-
-        for towerAux in self.getTowers():
-            towerAux.decReloadTime()
-
-        for trapAux in self.getTraps():
-            trapAux.decReloadTime()
-
-        for enemieAux in self.getEnemies():
-            enemieAux.executeEffects(self)
+    def playerLose(self, gameDisplay):
+        self._loseGame = True
 
     def getTimer(self):
         return self._timer

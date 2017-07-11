@@ -113,7 +113,7 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
 
     def moveShots(self, gameDisplay, enemieList, towerDefense):
         for shotAux in self._shotList:
-            shotAux.move()
+            shotAux.move(self)
             for enemieAux in enemieList:
                 if enemieAux.collide(shotAux):
                     if shotAux.getEffect() != "NULL":

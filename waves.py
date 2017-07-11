@@ -4,14 +4,13 @@ import config
 class Waves:
     def __init__(self, enemieFirstDirection, enemieSpawnPosition):
         self._waveNumber = 0
-        self._waveCicleNumber = 0
+        self._waveCicleNumber = 1
         self._waveIntraCicleNumber = 0
         self._enemieFirstDirection = enemieFirstDirection
         self._enemieSpawnPosition = enemieSpawnPosition
         self._bossWaveFlag = False
 
     def incWaveNumber(self):
-        print("ENTREI")
         if self._waveNumber % 10 == 0 and self._waveNumber != 0:
             if not self._bossWaveFlag:
                 self._bossWaveFlag = True

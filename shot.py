@@ -26,10 +26,15 @@ class Shot(rectangle.Rectangle):
         vector = vector[0] / 4, vector[1] / 4
         return vector
 
-    def move(self):
-        newPositionX = self._position[0] + self._direction[0]
-        newPositionY = self._position[1] + self._direction[1]
-        self.setPosition((newPositionX, newPositionY))
+    def move(self, tower):
+        if self._position[0] > 1000 or self._position[0] < 0:
+            self.destroy(tower)
+        elif self._position[1] > 1000 or self._position[1] < 0:
+            self.destroy(tower)
+        else:
+            newPositionX = self._position[0] + self._direction[0]
+            newPositionY = self._position[1] + self._direction[1]
+            self.setPosition((newPositionX, newPositionY))
 
     def destroy(self, tower):
         tower.delShot(self)

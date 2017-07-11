@@ -18,7 +18,7 @@ class Config:
     DISPLAY_HEIGHT = 480
     DISPLAY_SIZE = (DISPLAY_WIDTH, DISPLAY_HEIGHT)
     PLAYER_CASH = 400
-    PLAYER_LIFE = 50
+    PLAYER_LIFE = 30
     MENUTOWERS_IMAGE = "imagens/undo-menu-ingame.png"
     CREATIONMODE_IMAGE = "imagens/creation_menu.png"
 

@@ -85,7 +85,7 @@ class Menu:
                         if event.key == pygame.K_LSHIFT:
                             towerDefense.turnOffShift()
                     if event.type == pygame.USEREVENT + 1:
-                        towerDefense.decTimer()
+                        towerDefense.decTimer(game.getGameDisplay())
 
                 towerDefense.paintAllStuff(game.getGameDisplay(), mousePosition)
                 game.paintAllStuff(game.getGameDisplay(), game.getClock())
@@ -103,7 +103,7 @@ class Menu:
             root.withdraw()
             filename = askopenfilename()
             root.destroy()
-            self._start_new_game("Novo Jogador", filename)
+            self._start_new_game("Vinicius", filename)
 
         elif self._selectedOption == 1:
             maps = os.listdir("maps")
@@ -112,7 +112,7 @@ class Menu:
                 raise
             else:
                 filename = "maps/" + maps[random.randint(0, len(maps)-1)]
-            self._start_new_game("Novo Jogador", filename)
+            self._start_new_game("Vinicius", filename)
 
         elif self._selectedOption == 2:
             mapcreator = MP.MapCreator()

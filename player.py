@@ -1,4 +1,6 @@
 import config
+import pygame
+import menu as MENU
 
 # Classe Player:
 # Classe que define a profile do jogador atual, assim como os
@@ -39,8 +41,10 @@ class Player:
     def setLife(self, life):
         self._life = life
 
-    def decLife(self):
+    def decLife(self, towerDefense, gameDisplay):
         self._life -= 1
+        if(self._life == 0):
+            towerDefense.playerLose(gameDisplay)
 
     def getName(self):
         return self._name

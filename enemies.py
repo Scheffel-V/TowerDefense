@@ -5,10 +5,11 @@ import config
 class Enemie(rectangle.Rectangle):
     def __init__(self, position, width, height, image, health, speed, earnCash, lifesWillTook, firstDir, multiplier):
         super(Enemie, self).__init__(position, width, height, image)
-        self._health = health
+        self._health = health * multiplier
+        print("HEALTH: %d" % self._health)
         self._speed = speed
         self._originalSpeed = speed
-        self._earnCash = earnCash
+        self._earnCash = earnCash * multiplier
         self._lifesWillTook = lifesWillTook
         self._specialEffects = []
         self._upFlag = False
@@ -154,7 +155,7 @@ class Enemie(rectangle.Rectangle):
     # Logica pros bichinhos andarem em qualquer mapa criado desde que ele
     # nao volte pra esquerda nenhuma vez. Ainda vou acabar a ultima parte
     # pro mapa poder voltar ( mapas em espiral )
-    def move(self, mapMatrix, rectMap, towerDefense):
+    def move(self, mapMatrix, rectMap, towerDefense, gameDisplay):
 
         rectPosition = self.insideRectPosition(rectMap)
         rectPositionI = rectPosition[0]
@@ -166,7 +167,7 @@ class Enemie(rectangle.Rectangle):
         mapMatrixPosition = mapMatrix[rectPositionI][rectPositionJ]
 
         if mapMatrixPosition == config.Config.MAP_NUMBMATRIX_DESPAWN:
-            towerDefense.getPlayer().decLife()
+            towerDefense.getPlayer().decLife(towerDefense, gameDisplay)
             self.despawn(towerDefense)
         else:
             if self._rightFlag:
