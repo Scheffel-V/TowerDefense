@@ -220,38 +220,35 @@ class MapCreator:
 		isLeftClicked = False
 		isRightClicked = False
 
-		self.goFunctional()
-	def goFunctional(self):
-		
-		mousePos = pygame.mouse.get_pos()
-		if isLeftClicked:
-			self.setMatrixElement(self.getClickedSquare(mousePos),value=self.getCurrentValue())
+		while True:
+			mousePos = pygame.mouse.get_pos()
+			if isLeftClicked:
+				self.setMatrixElement(self.getClickedSquare(mousePos),value=self.getCurrentValue())
 
-		elif isRightClicked:
-			self.setMatrixElement(self.getClickedSquare(mousePos),value=0)
+			elif isRightClicked:
+				self.setMatrixElement(self.getClickedSquare(mousePos),value=0)
 
-		event = pygame.event.poll() # same as 'for event in pygame.event.get():' but more elegant
+			event = pygame.event.poll() # same as 'for event in pygame.event.get():' but more elegant
 
-		if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-			self.saveMatrix()
-			sys.exit("Exiting Map Creation !")
+			if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
+				self.saveMatrix()
+				sys.exit("Exiting Map Creation !")
 
-		if event.type == pygame.MOUSEBUTTONDOWN and event.button == self.getConf().LEFT_BUTTON:
-			isLeftClicked = True
-			self._handleMenuClick(mousePos)
+			if event.type == pygame.MOUSEBUTTONDOWN and event.button == self.getConf().LEFT_BUTTON:
+				isLeftClicked = True
+				self._handleMenuClick(mousePos)
 
-		if event.type == pygame.MOUSEBUTTONUP and event.button == self.getConf().LEFT_BUTTON:
-			isLeftClicked = False
+			if event.type == pygame.MOUSEBUTTONUP and event.button == self.getConf().LEFT_BUTTON:
+				isLeftClicked = False
 
-		if event.type == pygame.MOUSEBUTTONDOWN and event.button == self.getConf().RIGHT_BUTTON:
-			isRightClicked = True
+			if event.type == pygame.MOUSEBUTTONDOWN and event.button == self.getConf().RIGHT_BUTTON:
+				isRightClicked = True
 
-		if event.type == pygame.MOUSEBUTTONUP and event.button == self.getConf().RIGHT_BUTTON:
-			isRightClicked = False
+			if event.type == pygame.MOUSEBUTTONUP and event.button == self.getConf().RIGHT_BUTTON:
+				isRightClicked = False
 
-		self._updateScreenBuffer()
-		self._show()
-		self.goFunctional()
+			self._updateScreenBuffer()
+			self._show()
 
 
 # if __name__ == '__main__':
