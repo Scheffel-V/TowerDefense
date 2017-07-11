@@ -191,7 +191,7 @@ class Enemie(rectangle.Rectangle):
     # Logica pros bichinhos andarem em qualquer mapa criado desde que ele
     # nao volte pra esquerda nenhuma vez. Ainda vou acabar a ultima parte
     # pro mapa poder voltar ( mapas em espiral )
-    def move(self, mapMatrix, rectMap, towerDefense):
+    def move(self, mapMatrix, rectMap, towerDefense,gameDisplay):
 
         rectPosition = self.insideRectPosition(rectMap)
         rectPositionI = first(rectPosition)
@@ -203,7 +203,7 @@ class Enemie(rectangle.Rectangle):
         mapMatrixPosition = mapMatrix[rectPositionI][rectPositionJ]
 
         if mapMatrixPosition == config.Config.MAP_NUMBMATRIX_DESPAWN:
-            towerDefense.getPlayer().decLife()
+            towerDefense.getPlayer().decLife(towerDefense, gameDisplay)
             self.despawn(towerDefense)
         else:
             if self._rightFlag:
