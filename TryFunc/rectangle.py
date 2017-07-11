@@ -1,4 +1,6 @@
+#ok
 import pygame
+from func import*
 
 # Classe Rectangle:
 # Unidade da tela do jogo, de onde todas as outras derivam.F
@@ -13,18 +15,17 @@ class Rectangle(object):
     def collide(self, rectTwo):
         rectTwoPos = rectTwo.getPosition()
         rectTwoWidth, rectTwoheight = rectTwo.getDims()
-        position1 = (rectTwoPos[0] + 1, rectTwoPos[1]+1)
-        position2 = (rectTwoPos[0] + rectTwoWidth - 1, rectTwoPos[1] + 1)
-        position3 = (rectTwoPos[0] + rectTwoWidth - 1, rectTwoPos[1] + rectTwoheight - 1)
-        position4 = (rectTwoPos[0] + 1, rectTwoPos[1] + rectTwoheight - 1)
+        position1 = (first(rectTwoPos) + 1, second(rectTwoPos)+1)
+        position2 = (first(rectTwoPos) + rectTwoWidth - 1, second(rectTwoPos) + 1)
+        position3 = (first(rectTwoPos) + rectTwoWidth - 1, second(rectTwoPos) + rectTwoheight - 1)
+        position4 = (first(rectTwoPos) + 1, second(rectTwoPos) + rectTwoheight - 1)
         if self.isInside(position1) or self.isInside(position2) or self.isInside(position3) or self.isInside(position4):
             return True
-        return False
+        else:
+            return False
 
     def calcCenter(self):
-        xPosition, yPosition = self._position
-        xCenter, yCenter = xPosition + .5 * self._width, yPosition + .5 * self._height
-        return int(xCenter), int(yCenter)
+        return int(first(self._position) + .5 * self._width), int(second(self._position) + .5 * self._height)
 
     def getImage(self):
         return self._image
@@ -66,7 +67,7 @@ class Rectangle(object):
         surface.blit(self._image, self._position)
 
     def isInside(self, position):
-        if self._position[0] <= position[0] < self._position[0] + self._width:
-            if self._position[1] <= position[1] < self._position[1] + self._height:
-                return True
-        return False
+        if self._position[0] <= position[0] < self._position[0] + self._width and self._position[1] <= position[1] < self._position[1] + self._height:
+            return True
+        else:
+            return False

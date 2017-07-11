@@ -1,3 +1,4 @@
+#ok
 import pygame
 import config
 from tkinter.filedialog import askopenfilename
@@ -103,7 +104,7 @@ class Menu:
             root.withdraw()
             filename = askopenfilename()
             root.destroy()
-            self._start_new_game("Vinicius", filename)
+            self._start_new_game("Novo Jogador", filename)
 
         elif self._selectedOption == 1:
             maps = os.listdir("maps")
@@ -112,7 +113,7 @@ class Menu:
                 raise
             else:
                 filename = "maps/" + maps[random.randint(0, len(maps)-1)]
-            self._start_new_game("Vinicius", filename)
+            self._start_new_game("Novo Jogador", filename)
 
         elif self._selectedOption == 2:
             mapcreator = MP.MapCreator()

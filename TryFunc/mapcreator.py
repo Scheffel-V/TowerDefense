@@ -5,15 +5,33 @@ import map
 import rectangle
 from sys import argv
 import os
+from func import *
+
 
 class MapCreator:
-	def __init__(self, filemap=None):
+	def __init__(self, filemap=None):		
 		self._conf = config.Config()
 		self._screen = pygame.display.set_mode(self._conf.DISPLAY_SIZE)
 		self._matrix = [[0 for aux in range(self._conf.MAP_DIMX)] for aux2 in range(self._conf.MAP_DIMY)]
-		self._rectMap = map.Map(self._conf.MAP_DIMS, self._conf.RECT_DIMS_px, self._matrix, 'creation')
+		self._rectMap = map.Map2(self._conf.MAP_DIMS, self._conf.RECT_DIMS_px, self._matrix, 'creation')
 		self._currentValue = 1
 		self._filemap = filemap
+		#self._matrix = self.createMatrixWithZeros(self._conf.MAP_DIMX, self._conf.MAP_DIMY)
+
+	def createMatrixWithZeros(self, x, y):
+		return self.createMatrixColumn(self.createMatrixLane(x), y)
+
+	def createMatrixLane(self, x):
+		if x == 0:
+			return []
+		else:
+			return cons(0, self.createMatrixLane(x-1))
+
+	def createMatrixColumn(self, lane, y):
+		if y == 0:
+			return []
+		else:
+			return cons(lane, self.createMatrixColumn(lane,y-1))
 
 	def getCurrentValue(self):
 		return self._currentValue
@@ -43,9 +61,7 @@ class MapCreator:
 	def setMatrixElement(self,coords,value=0):
 		try:
 			if self._isValidValue(value):
-				x = coords[1]
-				y = coords[0]
-				self._matrix[x][y] = value
+				self._matrix[second(coords)][first(coords)] = value
 			else:
 				raise ValueError("Invalid value !")
 		except IndexError:
@@ -67,20 +83,19 @@ class MapCreator:
 		pygame.display.set_caption(string)
 
 	def getClickedSquare(self, pxPosition):
-		xPos = int(pxPosition[0]/self.getConf().RECT_DIMX_px)
-		yPos = int(pxPosition[1]/self.getConf().RECT_DIMX_px)
+		xPos = int(first(pxPosition)/self.getConf().RECT_DIMX_px)
+		yPos = int(second(pxPosition)/self.getConf().RECT_DIMX_px)
 		if xPos < self.getConf().MAP_DIMX and yPos < self.getConf().MAP_DIMY:	
 			return (xPos, yPos)
 		pass
 
 	def getNewFileName(self):
-
 		if self._filemap != None:
 			return self._filemap
 
 		maps = os.listdir("maps")
 
-		if maps == []:
+		if is_empty(maps):
 			return 'maps/map1.map'
 
 		all_index = []
@@ -88,7 +103,9 @@ class MapCreator:
 			name = mapa.split('/')[-1]
 			index = int(name.split('.')[0][3:])
 			all_index.append(index)
-
+		#maps = list(map(lambda x: x.split('/')[-1], maps))
+		#maps =list(map(lambda x: int(x.split('.')[0][3:]), maps))
+		#all_index = list(map(lambda x: cons(x, all_index), maps))
 		return 'maps/map' + str(max(all_index)+1) + '.map'
 
 
@@ -122,17 +139,17 @@ class MapCreator:
 	#TODO: @Otavio -> Tirar as coisas hardcoded
 	def _handleMenuClick(self, pos):
 		if self.getClickedSquare(pos) == None: #ou seja, se nenhum dos quadrados na tela foi apertado...
-			if pos[1] < 372 and pos[1] > 328:
-				if pos[0] < 537 and pos[0] > 508:
+			if second(pos) < 372 and second(pos) > 328:
+				if first(pos) < 537 and first(pos) > 508:
 					self.setCurrentValue(self.getConf().MAP_NUMBMATRIX_PATH)
-				elif pos[0] < 617 and pos[0] > 583:
+				elif first(pos) < 617 and first(pos) > 583:
 					self.setCurrentValue(self.getConf().MAP_NUMBMATRIX_CENTRALPATH)
-				elif pos[0] < 692 and pos[0] > 655:
+				elif first(pos) < 692 and first(pos) > 655:
 					self.setCurrentValue(self.getConf().MAP_NUMBMATRIX_SPAWN)
-				elif pos[0] < 767 and pos[0] > 727:
+				elif first(pos) < 767 and first(pos) > 727:
 					self.setCurrentValue(self.getConf().MAP_NUMBMATRIX_CHANGEDIRECTION)
-			elif pos[1] < 458 and pos[1] > 409:
-				if pos[0] < 537 and pos[0] > 508:
+			elif second(pos) < 458 and second(pos) > 409:
+				if first(pos) < 537 and first(pos) > 508:
 					self.setCurrentValue(self.getConf().MAP_NUMBMATRIX_DESPAWN)
 
 	def _isValidValue(self,value):
@@ -141,7 +158,7 @@ class MapCreator:
 		return False
 
 	def _updateRectMap(self):
-		self.setRectMap(map.Map(self.getConf().MAP_DIMS, self.getConf().RECT_DIMS_px, self._matrix, 'creation'))
+		self.setRectMap(map.Map2(self.getConf().MAP_DIMS, self.getConf().RECT_DIMS_px, self._matrix, 'creation'))
 		for i in range(0, self.getRectMap().getDimension()[0]):
 			for j in range(0, self.getRectMap().getDimension()[1]):
 				self.getRectMap().getMap()[i][j][1].paint(self.getScreen())

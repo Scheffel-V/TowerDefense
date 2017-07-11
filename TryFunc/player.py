@@ -1,3 +1,4 @@
+#ok
 import config
 
 # Classe Player:

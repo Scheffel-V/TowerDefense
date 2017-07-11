@@ -10,8 +10,8 @@ from func import*
 class Map2:
     def __init__(self, mapDimension, rectDimensionPx, matrix, mode=None):
         self._dimension = mapDimension
-        self._rectWidth = rectDimensionPx[0]
-        self._rectHeight = rectDimensionPx[1]
+        self._rectWidth = first(rectDimensionPx)
+        self._rectHeight = second(rectDimensionPx)
         self._map2 = []
         self.inicializeMap(matrix, mode)
 
@@ -46,10 +46,9 @@ class Map2:
             centralPathImg = config.Config.REGULAR_PATH_IMAGE
             changeDirImg = config.Config.REGULAR_PATH_IMAGE
 
-            imageList =[grassImg,regPathImg,spawnImg,desPawnImg,centralPathImg,changeDirImg] # Cause the subfunctions couldn't see these atributes
+        imageList =[grassImg,regPathImg,spawnImg,desPawnImg,centralPathImg,changeDirImg] # Cause the subfunctions couldn't see these atributes
                                                                                             # it was needed pass them to the subfuncionts
         self._map2 = createMap(matrix,self.getRectWidth(),self.getRectHeight(),imageList)
-        print("saddsa")
 
 
 def transformLineInMap(line_matrix, x, y,widht,height,imageList):

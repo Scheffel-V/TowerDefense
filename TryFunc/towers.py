@@ -1,3 +1,4 @@
+#ok
 # coding=utf-8
 import config
 import rectangle
@@ -5,6 +6,7 @@ import pygame
 import abc
 import shot
 import effects
+from func import *
 
 
 # Classe Tower estende de Rectangle:
@@ -97,30 +99,49 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
 
     def resetReloadTime(self):
         self._reloadTime = 1.0 / self._fireRate
-        #print self._reloadTime
+
+    def shotAndReload(self, enemies):
+        if is_empty(enemies):
+            return []
+        else:
+            enemieAux = first(enemies)
+            if self.isInsideRange(enemieAux.getPosition()):
+                self.shot(enemieAux)
+                self.resetReloadTime()
+                return []
+            else:
+                self.shotAndReload(rest(enemies))
 
     def shotEnemies(self, enemies):
         if self._reloadTime <= 0:
-            for enemieAux in enemies:
-                if self.isInsideRange(enemieAux.getPosition()):
-                    self.shot(enemieAux)
-                    self.resetReloadTime()
-                    break
+           self.shotAndReload(enemies)
 
     @abc.abstractmethod
     def shot(self, enemie):
         pass
 
+    def whenCollideWithEnemy(self, shot, enemieList, towerDefense):
+        if not is_empty(enemieList):
+            enemie = first(enemieList)
+            if enemie.collide(shot):
+                if shot.getEffect() != "NULL":
+                    enemie.setEffect(shot.getEffect())
+                enemie.hit(shot.getDamage(), towerDefense)
+                shot.destroy(self)
+            else:
+                self.whenCollideWithEnemy(shot, rest(enemieList), towerDefense)
+
+    def moveShotsAux(self, shots, enemieList, towerDefense):
+        if is_empty(shots):
+            return []
+        else:
+            shot = first(shots)
+            shot.move()
+            self.whenCollideWithEnemy(shot, enemieList, towerDefense)
+            self.moveShotsAux(rest(shots), enemieList, towerDefense)
+
     def moveShots(self, gameDisplay, enemieList, towerDefense):
-        for shotAux in self._shotList:
-            shotAux.move()
-            for enemieAux in enemieList:
-                if enemieAux.collide(shotAux):
-                    if shotAux.getEffect() != "NULL":
-                        enemieAux.setEffect(shotAux.getEffect())
-                    enemieAux.hit(shotAux.getDamage(), towerDefense)
-                    shotAux.destroy(self)
-                    break
+        self.moveShotsAux(self._shotList,enemieList, towerDefense)
         self.paintShots(gameDisplay)
 
     def delShot(self, shot):
@@ -130,15 +151,15 @@ class Tower(rectangle.Rectangle, metaclass=abc.ABCMeta):
             pass
 
     def paintShots(self, gameDisplay):
-        for shotAux in self._shotList:
-            shotAux.paint(gameDisplay)
+        list(map(lambda shot: shot.paint(gameDisplay), self._shotList))
 
     def isInsideRange(self, position):
         center = self.getCenter()
-        if center[0] - self._range <= position[0] < center[0] + self._range:
-            if center[1] - self._range <= position[1] < center[1] + self._range:
+        if first(center) - self._range <= first(position) < first(center) + self._range:
+            if second(center) - self._range <= second(position) < second(center) + self._range:
                 return True
-        return False
+        else:
+            return False
 
     def paintRange(self, gameDisplay, color):
         self._mouseCircleSurface.fill(config.Config.CK)

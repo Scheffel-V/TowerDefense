@@ -21,4 +21,5 @@ class Timer:
         elapsed = self.elapsed
         if self.running:
             elapsed += time.time() - self.last_start_time
-        return elapsed
+        else:
+            return elapsed
