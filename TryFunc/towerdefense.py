@@ -1,3 +1,4 @@
+#OK
 # coding=utf-8
 import pygame
 
@@ -8,7 +9,7 @@ import traps
 import enemies
 import rectangle
 import waves
-
+from func import *
 
 # Classe TowerDefense:
 # A classe principal. É aqui que todas as interações do jogador com
@@ -112,19 +113,33 @@ class TowerDefense:
 
     def getEnemySpawnPosition(self):
         try:
-            for i in range(len(self._matrix)):
-                for j in range(len(self._matrix[0])):
-                    if self._matrix[i][j] == config.Config.MAP_NUMBMATRIX_SPAWN:
-                        return (self.squarePosToPixel([i,j]))
+            i,j = self.getSpawnPosition()
+            return (self.squarePosToPixel([i,j]))
         except IndexError:
             print("Failed to acess matrix line")
             raise
 
     def getSpawnPosition(self):
-        for i in range(len(self._matrix)):
-            for j in range(len(self._matrix[0])):
-                if self._matrix[i][j] == config.Config.MAP_NUMBMATRIX_SPAWN:
-                    return i, j
+        matrix = self._matrix
+        return self.getSpawnPositionPerLine(matrix,0)
+    def getSpawnPositionPerLine(self,matrix,x):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            
+            i,j = self.getSpawnPositionPerColumn(line,x,0)
+            i_aux,j_aux = self.getSpawnPositionPerLine(rest(matrix),x+1)
+            
+            return i*i_aux, j * j_aux
+        else:
+            return 1,1
+    def getSpawnPositionPerColumn(self,column,x,y):
+        if is_empty(column):
+            return 1,1
+        elif first(column) == config.Config.MAP_NUMBMATRIX_SPAWN:
+            return x,y
+        else:
+            return self.getSpawnPositionPerColumn(rest(column),x,y+1)
+
 
     def getFirstDir(self):
         spawnPosI, spawnPosJ = self.getSpawnPosition()
@@ -226,43 +241,47 @@ class TowerDefense:
             self._insideTrapButton = True
 
     def executePurchasingTower(self, gameDisplay, mousePosition):
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                currentMapRect = self.getRectMap().getMap()[i][j][1]
-                if currentMapRect.isInside(mousePosition):
-                    self.selectedObject.setPosition(currentMapRect.getPosition())
-                    self.selectedObject.paint(gameDisplay)
-                    collide = False
-                    for towerAux in self.getTowers():
-                        if towerAux.collide(self.selectedObject):
-                            collide = True
-                    if not collide:
-                        if self.isInsidePath(self.selectedObject):
-                            collide = True
-                    if collide:
-                        self.selectedObject.paintRange(gameDisplay, config.Config.COLLIDE_COLOR)
-                    else:
-                        self.selectedObject.paintRange(gameDisplay, config.Config.NOT_COLLIDE_COLOR)
+        matrix = self.getRectMap().getMap()
+        self.executePurchasingStructPerLine(matrix,gameDisplay,mousePosition,0,self.isInsidePath(self.selectedObject),self.getTowers())
+        
+    def executePurchasingStructPerLine(self,matrix, gameDisplay,mousePosition,x,activateFunction,listOfStructs):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            self.executePurchasingStructPerColumn(line,gameDisplay,mousePosition,x,0,activateFunction,listOfStructs)
+            self.executePurchasingStructPerLine(rest(matrix),gameDisplay,mousePosition,x+1,activateFunction,listOfStructs)
+        else:
+            pass
+    def executePurchasingStructPerColumn(self,line,gameDisplay,mousePosition,x,y,activateFunction,listOfStructs):
+        if not (is_empty(line)):
+            currentMapRect = self.getRectMap().getMap()[x][y][1]
+            if currentMapRect.isInside(mousePosition):
+                self.selectedObject.setPosition(currentMapRect.getPosition())
+                self.selectedObject.paint(gameDisplay)
+                collide = False
+                collide = self.collideSomething(listOfStructs,self.selectedObject)
+                if not collide:
+                    if activateFunction:
+                        collide = True
+                if collide:
+                    self.selectedObject.paintRange(gameDisplay, config.Config.COLLIDE_COLOR)
+                else:
+                    self.selectedObject.paintRange(gameDisplay, config.Config.NOT_COLLIDE_COLOR)
+
+            self.executePurchasingStructPerColumn(rest(line),gameDisplay,mousePosition,x,y+1,activateFunction,listOfStructs)
+
+
+    def collideSomething(self,list,something):
+        if is_empty(list):
+            return False
+        if(first(list).collide(something)):
+            return True
+        else:
+            return self.collideSomething(rest(list),something)
 
     def executePurchasingTrap(self, gameDisplay, mousePosition):
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                currentMapRect = self.getRectMap().getMap()[i][j][1]
-                if currentMapRect.isInside(mousePosition):
-                    self.selectedObject.setPosition(currentMapRect.getPosition())
-                    self.selectedObject.paint(gameDisplay)
-                    collide = False
-                    if not collide:
-                        for trapAux in self.getTraps():
-                            if trapAux.collide(self.selectedObject):
-                                collide = True
-                    if not collide:
-                        if not self.isInsideCentralPath(self.selectedObject):
-                            collide = True
-                    if collide:
-                        self.selectedObject.paintRange(gameDisplay, config.Config.COLLIDE_COLOR)
-                    else:
-                        self.selectedObject.paintRange(gameDisplay, config.Config.NOT_COLLIDE_COLOR)
+        matrix = self.getRectMap().getMap()
+        self.executePurchasingStructPerLine(matrix,gameDisplay,mousePosition,0,not(self.isInsideCentralPath(self.selectedObject)),self.getTraps())
+        
 
     def executeClickedInTower(self, gameDisplay, mousePosition):
         self.selectedObject.paintRange(gameDisplay, config.Config.GREEN)
@@ -296,9 +315,7 @@ class TowerDefense:
                 newTower = self.selectedObject
                 newTower.setPosition(self.getRectMap().getMap()[self.I][self.J][1].getPosition())
                 newTowerColliding = False
-                for towerAux in self.getTowers():
-                    if towerAux.collide(newTower):
-                        newTowerColliding = True
+                newTowerColliding = self.collideSomething(list(self.getTowers()),newTower)
                 if not newTowerColliding:
                     newTowerColliding = self.isInsidePath(newTower)
                 if not newTowerColliding:
@@ -318,9 +335,7 @@ class TowerDefense:
                 newTrap = self.selectedObject
                 newTrap.setPosition(self.getRectMap().getMap()[self.I][self.J][1].getPosition())
                 newTrapColliding = False
-                for trapAux in self.getTraps():
-                    if trapAux.collide(newTrap):
-                        newTrapColliding = True
+                newTrapColliding = self.collideSomething(list(self.getTraps()),newTrap)
                 if not newTrapColliding:
                     if self.isInsideCentralPath(newTrap):
                         newTrapColliding = False
@@ -371,42 +386,59 @@ class TowerDefense:
                 self.turnOnPurchasingTrap()
 
     def isInsideRect(self, mousePosition):
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                if self.getRectMap().getMap()[i][j][1].isInside(mousePosition):
-                    self.I = i
-                    self.J = j
-                    return True
-        return False
+        matrix = self.getRectMap().getMap()
+        return self.isInsideRectPerLine(matrix,mousePosition,0)
+
+    def isInsideRectPerLine(self,matrix,mousePosition,x):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            ans1 = self.isInsideRectPerColumn(line,mousePosition,x,0)
+            ans2 = self.isInsideRectPerLine(rest(matrix),mousePosition,x+1)
+            return ans2 or ans1
+        else:
+            return False
+
+    def isInsideRectPerColumn(self,line,mousePosition,x,y):
+        if not (is_empty(line)):
+            if self.getRectMap().getMap()[x][y][1].isInside(mousePosition):
+                self.I = x
+                self.J = y
+                return True
+            return self.isInsideRectPerColumn(rest(line),mousePosition,x,y+1)
+        else:
+            return False
 
     def isInsideTowerOrTrap(self, mousePosition):
         return self.isInsideTower(mousePosition) or self.isInsideTrap(mousePosition)
+
+    def isInsideSomething(self,list,something):
+        if is_empty(list):
+            return False
+        if(first(list).isInside(something)):
+            self.selectedObject = first(list)
+            return True
+        else:
+            return self.isInsideSomething(rest(list),something)
 
     def isInsideTower(self, mousePosition):
         if mousePosition[0] > 480:
             return False
         else:
-            for towerAux in self.getTowers():
-                if towerAux.isInside(mousePosition):
-                    self.selectedObject = towerAux
-                    return True
-        return False
-
+            return self.isInsideSomething(list(self.getTowers()),mousePosition)
+            
     def isInsideTrap(self, mousePosition):
         if mousePosition[0] > 480:
             return False
         else:
-            for trapAux in self.getTraps():
-                if trapAux.isInside(mousePosition):
-                    self.selectedObject = trapAux
-                    return True
-        return False
+            return self.isInsideSomething(list(self.getTraps()),mousePosition)
 
-    def isInsideBuying(self, mousePosition):
+    def isInsideBuying(self,mousePosition):
+        return self.isInsideBuyingAux(mousePosition,0)
+    def isInsideBuyingAux(self, mousePosition,i):
         if mousePosition[0] < 480:
             return False
         else:
-            for i in range(0, 4):
+            if (i < 4):
                 if self._buyingTowers[i].isInside(mousePosition):
                     towerClass = self._buyingTowers[i].getClass()
                     if towerClass == "ClassicTowerBuyer":
@@ -418,41 +450,70 @@ class TowerDefense:
                     elif towerClass == "ThunderTowerBuyer":
                         self.selectedObject = towers.ThunderTower((0, 0))
                     return True
-            for i in range(0, 4):
+
                 if self._buyingTraps[i].isInside(mousePosition):
                     trapClass = self._buyingTraps[i].getClass()
-                    print(trapClass)
+                    #print(trapClass)
                     if trapClass == "FireTrapBuyer":
                         self.selectedObject = traps.FireTrap((0, 0))
                     elif trapClass == "IceTrapBuyer":
                         self.selectedObject = traps.IceTrap((0, 0))
                     elif trapClass == "ThunderTrapBuyer":
-                        print("ENTREI")
+                        #print("ENTREI")
                         self.selectedObject = traps.ThunderTrap((0, 0))
                     elif trapClass == "PoisonTrapBuyer":
                         self.selectedObject = traps.PoisonTrap((0, 0))
                     return True
+                return self.isInsideBuyingAux(mousePosition,i+1)
+            else:
+                return False
         return False
 
     def isInsidePath(self, object):
         rectMap = self.getRectMap().getMap()
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                if rectMap[i][j][0] != 0:
-                    if rectMap[i][j][1].collide(object):
-                        return True
-        return False
+        return self.isInsidePathPerLine(rectMap,object,0)
+    
+    def isInsidePathPerLine(self,matrix,object,x):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            ans1 = self.isInsidePathPerColumn(line,object,x,0)
+            ans2 = self.isInsidePathPerLine(rest(matrix),object,x+1)
+            return ans2 or ans1
+        else:
+            return False
 
+    def isInsidePathPerColumn(self,line,object,x,y):
+        if not (is_empty(line)):
+            if first(first(line)) != 0:
+                if first(line)[1].collide(object):
+                    return True
+            return self.isInsidePathPerColumn(rest(line),object,x,y+1)
+        else:
+            return False
+    
     def isInsideCentralPath(self, object):
         rectMap = self.getRectMap().getMap()
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                rectID = rectMap[i][j][0]
-                if rectID == config.Config.MAP_NUMBMATRIX_CENTRALPATH\
-                        or rectID == config.Config.MAP_NUMBMATRIX_CHANGEDIRECTION:
-                    if rectMap[i][j][1].collide(object):
-                        return True
-        return False
+        return self.isInsideCentralPathPerLine(rectMap,object,0)
+
+    def isInsideCentralPathPerLine(self,matrix,object,x):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            ans1 = self.isInsideCentralPathPerColumn(line,object,x,0)
+            ans2 = self.isInsideCentralPathPerLine(rest(matrix),object,x+1)
+            return ans2 or ans1
+        else:
+            return False
+
+    def isInsideCentralPathPerColumn(self,line,object,x,y):
+        if not (is_empty(line)):
+            rectID = first(line)[0]
+            if rectID == config.Config.MAP_NUMBMATRIX_CENTRALPATH\
+                    or rectID == config.Config.MAP_NUMBMATRIX_CHANGEDIRECTION:
+                if first(line)[1].collide(object):
+                    return True
+            return self.isInsideCentralPathPerColumn(rest(line),object,x,y+1)
+        else:
+            return False
 
     def paintAllStuff(self, gameDisplay, mousePosition):
         self.paintRectMap(gameDisplay)
@@ -482,42 +543,53 @@ class TowerDefense:
 
 
     def paintTowers(self, gameDisplay):
-        for towerAux in self.getTowers():
-            towerAux.paint(gameDisplay)
+        list(map(lambda towerAux: towerAux.paint(gameDisplay), self.getTowers()))        
+        
 
     def paintTraps(self, gameDisplay):
-        for trapAux in self.getTraps():
-            trapAux.paint(gameDisplay)
+        list(map(lambda trapAux: trapAux.paint(gameDisplay), self.getTraps()))   
 
     def paintEnemies(self, gameDisplay):
-        for enemiesAux in self.getEnemies():
-            enemiesAux.move(self._matrix, self._rectMap, self)
-            enemiesAux.paint(gameDisplay)
-
+        list(map(lambda enemiesAux: enemiesAux.move(self._matrix, self._rectMap, self), self.getEnemies()))
+        list(map(lambda enemiesAux: enemiesAux.paint(gameDisplay), self.getEnemies()))   
+        
     def paintShots(self, gameDisplay):
-        for towerAux in self.getTowers():
-            towerAux.shotEnemies(self.getEnemies())
-            towerAux.moveShots(gameDisplay, self.getEnemies(), self)
-        for trapAux in self.getTraps():
-            trapAux.shotEnemies(self.getEnemies(), self)
-
+        list(map(lambda towerAux: towerAux.shotEnemies(self.getEnemies()), self.getTowers()))
+        list(map(lambda towerAux: towerAux.moveShots(gameDisplay, self.getEnemies(), self), self.getTowers()))
+        
+        list(map(lambda trapAux: trapAux.shotEnemies(self.getEnemies(), self), self.getTraps()))
+        
 
     def paintRectMap(self, gameDisplay):
-        for i in range(0, self.getRectMap().getDimension()[0]):
-            for j in range(0, self.getRectMap().getDimension()[1]):
-                self.getRectMap().getMap()[i][j][1].paint(gameDisplay)
+        matrix = self.getRectMap().getMap()
+        self.paintRectMapPerLine(matrix,gameDisplay)
+        
+    def paintRectMapPerLine(self,matrix,gameDisplay):
+        if not (is_empty(matrix)):
+            line = list(first(matrix))
+            self.paintRectMapPerColumn(line,gameDisplay)
+            self.paintRectMapPerLine(rest(matrix),gameDisplay)
+        else:
+            pass
+
+    def paintRectMapPerColumn(self,line,gameDisplay):
+        if not (is_empty(line)):
+            second(first(line)).paint(gameDisplay)
+            self.paintRectMapPerColumn(rest(line),gameDisplay)
+
+
+
+
 
     def paintTowerMenuBackground(self, gameDisplay):
         gameDisplay.blit(self._towerMenuBackground, (480, 0))
 
     def paintBuyingTowers(self, gameDisplay):
-        for buyingTower in self._buyingTowers:
-            buyingTower.paint(gameDisplay)
+        list(map(lambda buyingTower: buyingTower.paint(gameDisplay), self._buyingTowers))     
 
     def paintBuyingTraps(self, gameDisplay):
-        for buyingTrap in self._buyingTraps:
-            buyingTrap.paint(gameDisplay)
-
+        list(map(lambda buyingTrap: buyingTrap.paint(gameDisplay), self._buyingTraps))     
+    
     def paintCash(self, gameDisplay):
         font = pygame.font.SysFont(None, 25)
         text = font.render("CASH: %d" % self._player.getCash(), True, (0, 0, 0))
@@ -572,14 +644,12 @@ class TowerDefense:
         if self._waveOn:
             self._enemieTimer -= 1
 
-        for towerAux in self.getTowers():
-            towerAux.decReloadTime()
+        list(map(lambda towerAux: towerAux.decReloadTime(), self.getTowers()))     
 
-        for trapAux in self.getTraps():
-            trapAux.decReloadTime()
 
-        for enemieAux in self.getEnemies():
-            enemieAux.executeEffects(self)
+        list(map(lambda trapAux: trapAux.decReloadTime(), self.getTraps()))
+
+        list(map(lambda enemieAux: enemieAux.executeEffects(self), self.getEnemies()))
 
     def getTimer(self):
         return self._timer
@@ -587,5 +657,16 @@ class TowerDefense:
     def inicializeMatrix(self):
         f = open(self.getPlayerMap())
         self._matrix = []
-        for line in f.readlines():
-            self._matrix.append([int(x) for x in line.strip('[]\n').split(',')])
+        file_lines = f.readlines()
+        self.inicializeMatrixPerLines(file_lines)
+    
+    def inicializeMatrixPerLines(self,matrix):
+        if not (is_empty(matrix)):
+            self._matrix.append(self.inicializeMatrixPerColumns(first(matrix).strip('[]\n').split(',')))
+            self.inicializeMatrixPerLines(rest(matrix))
+    def inicializeMatrixPerColumns(self,line):
+        if not (is_empty(line)):
+            return cons(int(first(line)), self.inicializeMatrixPerColumns(rest(line)))
+        else:
+            return empty
+        
