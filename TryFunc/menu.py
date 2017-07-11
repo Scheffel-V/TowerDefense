@@ -86,7 +86,7 @@ class Menu:
                         if event.key == pygame.K_LSHIFT:
                             towerDefense.turnOffShift()
                     if event.type == pygame.USEREVENT + 1:
-                        towerDefense.decTimer()
+                        towerDefense.decTimer((game.getGameDisplay()))
 
                 towerDefense.paintAllStuff(game.getGameDisplay(), mousePosition)
                 game.paintAllStuff(game.getGameDisplay(), game.getClock())
