@@ -10,7 +10,7 @@ import enemies
 import rectangle
 import waves
 from func import *
-
+import menu as MENU
 # Classe TowerDefense:
 # A classe principal. É aqui que todas as interações do jogador com
 # a partida são realizadas. Por exemplo eventos de estar comprando uma torre,
@@ -28,6 +28,7 @@ class TowerDefense:
         self._purchasingTrap = False
         self._clickedInTower = False
         self._clickedInTrap = False
+        self._loseGame = False
         self._matrix = 0
         self._player_map = None
         self.setPlayerMap(player_map)
@@ -68,6 +69,7 @@ class TowerDefense:
         self._cash = config.Config.PLAYER_CASH
         self._player = player
         self._timer = 0
+        self._endTimer = 5
         self._enemieTimer = 1
         self._beginWaveTimer = 10
         self._enemieFirstDirection = self.getFirstDir()
@@ -516,30 +518,32 @@ class TowerDefense:
             return False
 
     def paintAllStuff(self, gameDisplay, mousePosition):
-        self.paintRectMap(gameDisplay)
-        self.paintTowers(gameDisplay)
-        self.paintTraps(gameDisplay)
-        if self.isPurchasingTower():
-            self.executePurchasingTower(gameDisplay, mousePosition)
-        elif self.isPurchasingTrap():
-            self.executePurchasingTrap(gameDisplay, mousePosition)
-        self.paintTowerMenuBackground(gameDisplay)
-        if self.isClickedInTower():
-            self.executeClickedInTower(gameDisplay, mousePosition)
-        if self.isClickedInTrap():
-            self.executeClickedInTrap(gameDisplay, mousePosition)
-        self.paintBuyingTowers(gameDisplay)
-        self.paintBuyingTraps(gameDisplay)
-        self.paintCash(gameDisplay)
-        self.paintLife(gameDisplay)
-        self.paintName(gameDisplay)
-        self.paintWave(gameDisplay)
-        if self.getTimer() > 0:
-            self.paintHaveNoCashMess(gameDisplay, mousePosition)
-        if self._enemieTimer == 0:
-            self.spawnEnemie()
-        self.paintShots(gameDisplay)
-        self.paintEnemies(gameDisplay)
+        if not self._loseGame:
+
+            self.paintRectMap(gameDisplay)
+            self.paintTowers(gameDisplay)
+            self.paintTraps(gameDisplay)
+            if self.isPurchasingTower():
+                self.executePurchasingTower(gameDisplay, mousePosition)
+            elif self.isPurchasingTrap():
+                self.executePurchasingTrap(gameDisplay, mousePosition)
+            self.paintTowerMenuBackground(gameDisplay)
+            if self.isClickedInTower():
+                self.executeClickedInTower(gameDisplay, mousePosition)
+            if self.isClickedInTrap():
+                self.executeClickedInTrap(gameDisplay, mousePosition)
+            self.paintBuyingTowers(gameDisplay)
+            self.paintBuyingTraps(gameDisplay)
+            self.paintCash(gameDisplay)
+            self.paintLife(gameDisplay)
+            self.paintName(gameDisplay)
+            self.paintWave(gameDisplay)
+            if self.getTimer() > 0:
+                self.paintHaveNoCashMess(gameDisplay, mousePosition)
+            if self._enemieTimer == 0:
+                self.spawnEnemie()
+            self.paintShots(gameDisplay)
+            self.paintEnemies(gameDisplay)
 
 
     def paintTowers(self, gameDisplay):
@@ -550,7 +554,7 @@ class TowerDefense:
         list(map(lambda trapAux: trapAux.paint(gameDisplay), self.getTraps()))   
 
     def paintEnemies(self, gameDisplay):
-        list(map(lambda enemiesAux: enemiesAux.move(self._matrix, self._rectMap, self), self.getEnemies()))
+        list(map(lambda enemiesAux: enemiesAux.move(self._matrix, self._rectMap, self,gameDisplay), self.getEnemies()))
         list(map(lambda enemiesAux: enemiesAux.paint(gameDisplay), self.getEnemies()))   
         
     def paintShots(self, gameDisplay):
@@ -629,28 +633,40 @@ class TowerDefense:
     def isShiftOn(self):
         return self._shift
 
-    def decTimer(self):
-        self._timer -= 1
+    def paintLoseGameMessage(self, gameDisplay):
+        font = pygame.font.SysFont(None, 100, True, False)
+        text = font.render("YOU LOSE!", True, ((0, 0, 0)))
+        gameDisplay.blit(text, (100, 100))
+        text = font.render("WAVE:%d" % self._wave.getWaveNumber(), True, ((0, 0, 0)))
+        gameDisplay.blit(text, (100, 150))
 
-        if self._beginWaveTimer == 0 and not self._waveOn:
-            self._wave.incWaveNumber()
-            self._waveOn = True
+
+    def decTimer(self, gameDisplay):
+        if not self._loseGame:
+            self._timer -= 1
+
+            if self._beginWaveTimer == 0 and not self._waveOn:
+                self._wave.incWaveNumber()
+                self._waveOn = True
+            else:
+                if not self._enemiesList and (self._spawnEnemieCount == 10 or self._spawnEnemieCount == 0):
+                    self._waveOn = False
+                    self._spawnEnemieCount = 0
+                    self._beginWaveTimer -= 1
+
+            if self._waveOn:
+                self._enemieTimer -= 1
+
+            list(map(lambda towerAux: towerAux.decReloadTime(), self.getTowers()))     
+            list(map(lambda trapAux: trapAux.decReloadTime(), self.getTraps()))
+            list(map(lambda enemieAux: enemieAux.executeEffects(self), self.getEnemies()))
         else:
-            if not self._enemiesList:
-                self._waveOn = False
-                self._spawnEnemieCount = 0
-                self._beginWaveTimer -= 1
-
-        if self._waveOn:
-            self._enemieTimer -= 1
-
-        list(map(lambda towerAux: towerAux.decReloadTime(), self.getTowers()))     
-
-
-        list(map(lambda trapAux: trapAux.decReloadTime(), self.getTraps()))
-
-        list(map(lambda enemieAux: enemieAux.executeEffects(self), self.getEnemies()))
-
+            self._endTimer -= 1
+            self.paintLoseGameMessage(gameDisplay)
+            if self._endTimer == 0:
+                pygame.quit()
+                menu = MENU.Menu()
+                menu.start()
     def getTimer(self):
         return self._timer
 
@@ -670,3 +686,5 @@ class TowerDefense:
         else:
             return empty
         
+    def playerLose(self, gameDisplay):
+        self._loseGame = True
